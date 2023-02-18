@@ -7,16 +7,18 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Drivetrain;
 
-public class JoystickControl extends CommandBase {
+public class PercentageControl extends CommandBase {
   private Arm arm;
   private Joystick joystick;
   /** Creates a new JoystickControl. */
-  public JoystickControl(Arm arm, Joystick joystick) {
+  public PercentageControl(Drivetrain drivetrain, Arm arm, Joystick joystick) {
     this.arm = arm;
     this.joystick = joystick;
 
     addRequirements(arm);
+    addRequirements(drivetrain);
   }
 
   // Called when the command is initially scheduled.
@@ -27,6 +29,8 @@ public class JoystickControl extends CommandBase {
   @Override
   public void execute() {
     arm.setBaseMotorOutput(joystick.getY() * Arm.baseSpeedLimit);
+
+    arm.setElbowMotorOutput(joystick.getX() * Arm.elbowSpeedLimit);
 
 
     if(joystick.getRawButtonPressed(5)){

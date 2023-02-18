@@ -5,12 +5,18 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.JoystickControl;
+import frc.robot.commands.PositionControl;
 import frc.robot.subsystems.Arm;
+
+import javax.swing.text.Position;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -25,8 +31,12 @@ public class RobotContainer {
 
   private final Joystick joystick = new Joystick(0);
 
+  private final JoystickControl joystickControl = new JoystickControl(arm, joystick);
+  private final PositionControl positionControl = new PositionControl(arm, joystick);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    arm.setDefaultCommand(joystickControl);
     // Configure the trigger bindings
     configureBindings();
   }
@@ -41,6 +51,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    new JoystickButton(joystick, 1).onTrue(positionControl);
 
   }
 

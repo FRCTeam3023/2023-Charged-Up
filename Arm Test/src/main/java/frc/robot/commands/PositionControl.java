@@ -4,37 +4,40 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Arm;
 
-public class JoystickControl extends CommandBase {
+public class PositionControl extends CommandBase {
+  /** Creates a new PositionControl. */
+
   private Arm arm;
   private Joystick joystick;
-  /** Creates a new JoystickControl. */
-  public JoystickControl(Arm arm, Joystick joystick) {
+
+  private Rotation2d startPos = new Rotation2d();
+
+
+
+  public PositionControl(Arm arm, Joystick joystick) {
     this.arm = arm;
     this.joystick = joystick;
-
     addRequirements(arm);
+
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    startPos = arm.getBaseJointPos();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    arm.setBaseMotorOutput(joystick.getY() * Arm.baseSpeedLimit);
-
-
-    if(joystick.getRawButtonPressed(5)){
-      Arm.baseSpeedLimit = Arm.baseSpeedLimit + 0.05;
-    }
-    if(joystick.getRawButtonPressed(6)){
-      Arm.baseSpeedLimit = Arm.baseSpeedLimit - 0.05;
-    }
+    Rotation2d joystickPosition = Rotation2d.fromDegrees(45*joystick.getY());
+    arm.setBaseMotorPosition(startPos.plus(joystickPosition));
+    
   }
 
   // Called once the command ends or is interrupted.
