@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,18 +18,26 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Gains;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.commands.SetArmState;
 
 public class Arm extends SubsystemBase {
 
   private TalonFX baseMotor = new TalonFX(10);
   private TalonFX elbowMotor = new TalonFX(11);
+  private TalonSRX wristMotor = new TalonSRX(12);
+  private TalonSRX clawMotor = new TalonSRX(13);
+
 
   public static double elbowSpeedLimit = 0.2;
   public static double baseSpeedLimit = 0.25;
 
-  public Gains baseJointGains = new Gains(40, 0, 0, 0,0, 0.2);
+  public Gains baseJointGains = new Gains(20, 0, 0, 0,0, 0.5);
 
-  public Gains elbowJointGains = new Gains(20, 0, 0, 0, 0, 0.2);
+  public Gains elbowJointGains = new Gains(20, 0, 10, 0, 0, 0.75);
+
+  public Gains wristJointGains = new Gains(20, 0, 0, 0, 0, 0.5);
+  public Gains clawJointGains = new Gains(0, 0, 0, 0, 0, 0);
+
 
 
 
@@ -50,6 +59,7 @@ public class Arm extends SubsystemBase {
     baseMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.F);
 
     baseMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.PeakOutput);
+    baseMotor.configClosedloopRamp(0.1);
 
     baseMotor.setSelectedSensorPosition(0);
 
@@ -63,27 +73,93 @@ public class Arm extends SubsystemBase {
     elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX, Constants.TIMEOUT_MS);
 
     //returns degrees of motion instead of sensor units
-    elbowMotor.configSelectedFeedbackCoefficient((1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.ELBOW_GEAR_RATIO) * 360);
+    elbowMotor.configSelectedFeedbackCoefficient( (1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.ELBOW_GEAR_RATIO) * 360);
 
-    elbowMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.P);
-    elbowMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.I);
-    elbowMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.D);
-    elbowMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.F);
 
-    elbowMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.PeakOutput);
+    elbowMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.P);
+    elbowMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.I);
+    elbowMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.D);
+    elbowMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.F);
+
+    elbowMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.PeakOutput);
+    elbowMotor.configClosedloopRamp(0.1);
 
     elbowMotor.setSelectedSensorPosition(0);
+
+    //----------------------------------------------------------------
+
+    wristMotor.configFactoryDefault();
+    wristMotor.setNeutralMode(NeutralMode.Brake);
+    wristMotor.set(ControlMode.PercentOutput, 0);
+    wristMotor.setInverted(false);
+
+    wristMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder );
+    wristMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * 360);
+
+    wristMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.P);
+    wristMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.I);
+    wristMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.D);
+    wristMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.F);
+
+    wristMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.PeakOutput);
+
+    //------------------------------------------------------------------
+
+    clawMotor.configFactoryDefault();
+    clawMotor.setNeutralMode(NeutralMode.Brake); 
+    clawMotor.set(ControlMode.PercentOutput,0);
+    clawMotor.setInverted(false);
+
+    // clawMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    // clawMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * (1/ArmConstants.CLAW_PULLEY_RATIO) * 360);
+
+    // clawMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.P);
+    // clawMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.I);
+    // clawMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.D);
+    // clawMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.F);
+
+    // clawMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.PeakOutput);
+
   }
 
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Arm Angle", getBaseJointPos().getDegrees());
+    SmartDashboard.putNumber("Elbow Angle", getElbowMotorPos().getDegrees());
+    SmartDashboard.putNumber("Wrist Angle", getWristMotorPos().getDegrees());
+
+    SmartDashboard.putNumber("Error", baseMotor.getClosedLoopError());
     // This method will be called once per scheduler run
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+  }
+
+
+  public void setArmState(Rotation2d basePos, Rotation2d elbowPos, Rotation2d wristPos, boolean clawClosed){
+    setBaseMotorPosition(basePos);
+    setElbowMotorPosition(elbowPos);
+    setWristMotorPos(wristPos);
+
+    if(clawClosed){
+      setClawMotorOutput(0.2);
+      if(getClawPosition() > 1){
+        setClawMotorOutput(0);
+      }
+    }else{
+      setClawMotorPos(0);
+    }
+
+  }
+
+  public void setArmState(Rotation2d basePos, Rotation2d elbowPos, Rotation2d wristPos, double clawPos){
+    setBaseMotorPosition(basePos);
+    setElbowMotorPosition(elbowPos);
+    setWristMotorPos(wristPos);
+    setClawMotorPos(clawPos);
+
   }
 
   /**
@@ -111,6 +187,16 @@ public class Arm extends SubsystemBase {
     return Rotation2d.fromDegrees(baseMotor.getSelectedSensorPosition());
   }
 
+
+  /**
+   * Set output percent of elbow motor
+   * @param percentOutput
+   */
+  public void setElbowMotorOutput(double percentOutput){
+    elbowMotor.set(ControlMode.PercentOutput, percentOutput);
+
+  }
+
   /**
    * set the target angle for the elbow joint.
    * 0 degrees is straight down.
@@ -121,11 +207,43 @@ public class Arm extends SubsystemBase {
   }
 
   /**
-   * Set output percent of elbow motor
-   * @param percentOutput
+   * get Elbow position
+   * @return
    */
-  public void setElbowMotorOutput(double percentOutput){
-    elbowMotor.set(ControlMode.PercentOutput, percentOutput);
+  public Rotation2d getElbowMotorPos(){
+    return Rotation2d.fromDegrees(elbowMotor.getSelectedSensorPosition());
+  }
 
+
+  public void setWristMotorOutput(double percentOutput){
+    wristMotor.set(ControlMode.PercentOutput, percentOutput);
+  }
+
+  public void setWristMotorPos(Rotation2d angle){
+    wristMotor.set(ControlMode.Position, angle.getDegrees());
+  }
+
+  public Rotation2d getWristMotorPos() {
+    return Rotation2d.fromDegrees(wristMotor.getSelectedSensorPosition());
+  }
+
+
+
+  
+  public void setClawMotorOutput (double percentOutput){
+    clawMotor.set(ControlMode.PercentOutput, percentOutput);
+  }
+
+  public void setClawMotorPos(double closePercent){
+    clawMotor.set(ControlMode.Position, closePercent);
+
+  }
+
+  public double getClawPosition(){
+    return clawMotor.getSelectedSensorPosition();
+  }
+
+  public double getBaseError(){
+    return baseMotor.getClosedLoopError();
   }
 }

@@ -41,6 +41,9 @@ public class PositionControl extends CommandBase {
     Rotation2d joystickPosition = Rotation2d.fromDegrees(45*joystick.getY());
     arm.setBaseMotorPosition(startPos.plus(joystickPosition));
 
+    Rotation2d joystickXPos = Rotation2d.fromDegrees(45 * joystick.getX());
+    arm.setWristMotorPos(joystickXPos);
+
     SmartDashboard.putNumber("Target Pos", startPos.plus(joystickPosition).getDegrees());
     
   }

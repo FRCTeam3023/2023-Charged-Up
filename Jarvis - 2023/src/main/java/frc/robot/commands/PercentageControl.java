@@ -32,6 +32,23 @@ public class PercentageControl extends CommandBase {
 
     arm.setElbowMotorOutput(joystick.getX() * Arm.elbowSpeedLimit);
 
+    if(joystick.getRawButton(8)){
+      arm.setWristMotorOutput(0.2);
+    }else if(joystick.getRawButton(10)){
+      arm.setWristMotorOutput(-0.2);
+    }else{
+      arm.setWristMotorOutput(0);
+    }
+
+    if(joystick.getRawButton(9)){
+      arm.setClawMotorOutput(0.5);
+
+    }else if(joystick.getRawButton(11)){
+      arm.setClawMotorOutput(-.5);
+    }else{
+      arm.setClawMotorOutput(0);
+    }
+
 
     if(joystick.getRawButtonPressed(5)){
       Arm.baseSpeedLimit = Arm.baseSpeedLimit + 0.05;

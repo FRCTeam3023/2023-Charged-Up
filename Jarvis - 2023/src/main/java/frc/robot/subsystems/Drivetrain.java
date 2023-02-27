@@ -23,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -43,7 +44,10 @@ public class Drivetrain extends SubsystemBase {
   
   ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0,0,0);
 
-  private final ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+  // private final ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+
+  // ADIS16470 plugged into the MXP port
+  ADIS16470_IMU gyro = new ADIS16470_IMU();
 
   //module objects
   private SwerveModule frontLeft = new SwerveModule(1, 1, 5, ModuleConstants.MODULE1_OFFSET, true, 0); // Module 1
@@ -66,18 +70,18 @@ public class Drivetrain extends SubsystemBase {
     getChassisAngle(), 
     new SwerveModulePosition[] {frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()},
     new Pose2d(0,0, new Rotation2d()),
-    new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1,0.1,0.1), //Standard deviations for state estimate, (m,m,rad). Increase to trust less
+    new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.05,0.05,0.05), //Standard deviations for state estimate, (m,m,rad). Increase to trust less
     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.9,0.9,0.9) //Standard deviations for vision estimate, (m,m,rad). Increase to trust less
     );
      
-    
+
   public boolean allModuleHomeStatus = false;
 
 
   public Drivetrain(/*PhotonCamera photonCamera*/) {
     calibrateGyro();
 
-    this.photonCamera = photonCamera;
+    // this.photonCamera = photonCamera;
 
     setCurrentPose(new Pose2d(new Translation2d(1, 0), Rotation2d.fromDegrees(180)));
 
@@ -86,6 +90,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
 
+    
     // This method will be called once per scheduler run
     SmartDashboard.putBoolean("1 Homed", frontLeft.homeFinished);
     SmartDashboard.putBoolean("2 Homed", frontRight.homeFinished);
@@ -104,7 +109,9 @@ public class Drivetrain extends SubsystemBase {
     //   if (target.getPoseAmbiguity() <= .05) {
     //     Transform3d camToTarget = target.getBestCameraToTarget();
     //     Transform3d targetToCamera = camToTarget.inverse();
-    //     Pose3d camPose = PhotonConstants.TARGET_POSE.transformBy(targetToCamera);
+
+    //     Pose3d targetPose = getSelectedTargetPose(target.getFiducialId());
+    //     Pose3d camPose = targetPose.transformBy(targetToCamera);
 
     //     Pose2d visionMeasurement = camPose.transformBy(PhotonConstants.CAMERA_TO_ROBOT).toPose2d();
     //     poseEstimator.addVisionMeasurement(visionMeasurement, resultTimestamp);
@@ -228,7 +235,8 @@ public class Drivetrain extends SubsystemBase {
    * @return current chassis angle
    */
   public Rotation2d getChassisAngle(){
-    return gyro.getRotation2d();
+    // return gyro.getRotation2d();
+    return Rotation2d.fromDegrees(gyro.getAngle());
   }
 
   /**
@@ -267,6 +275,43 @@ public class Drivetrain extends SubsystemBase {
   }
 
 
+
+  public Pose3d getSelectedTargetPose(int ID){
+    Pose3d targetPose;
+
+    switch (ID) {
+      case 1:
+        targetPose = PhotonConstants.TARGET_1_POSE;
+        break;
+      case 2:
+        targetPose = PhotonConstants.TARGET_2_POSE;
+        break;
+      case 3:
+        targetPose = PhotonConstants.TARGET_3_POSE;
+        break;
+      case 4:
+        targetPose = PhotonConstants.TARGET_4_POSE;
+        break;
+      case 5:
+        targetPose = PhotonConstants.TARGET_5_POSE;
+        break;
+      case 6:
+        targetPose = PhotonConstants.TARGET_6_POSE;
+        break;
+      case 7:
+        targetPose = PhotonConstants.TARGET_7_POSE;
+        break;
+      case 8:
+        targetPose = PhotonConstants.TARGET_8_POSE;
+        break;
+    
+      default:
+        targetPose = new Pose3d();
+        break;
+    }
+    
+    return targetPose;
+  }
 
 
 }

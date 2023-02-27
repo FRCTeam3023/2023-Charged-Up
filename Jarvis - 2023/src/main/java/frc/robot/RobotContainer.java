@@ -16,6 +16,7 @@ import com.pathplanner.lib.server.PathPlannerServer;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -29,6 +30,7 @@ import frc.robot.commands.HomeCommand;
 import frc.robot.commands.JoystickDrive;
 import frc.robot.commands.PercentageControl;
 import frc.robot.commands.PositionControl;
+import frc.robot.commands.SetArmState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 
@@ -109,14 +111,16 @@ public class RobotContainer {
      */
 
 
-    new JoystickButton(mainJoystick, 1).onTrue(positionControl);
+    new JoystickButton(mainJoystick, 1).whileTrue(positionControl);
 
-    new JoystickButton(mainJoystick, 2).onTrue(percentageControl);
+    new JoystickButton(mainJoystick, 2).whileTrue(percentageControl);
 
-    new JoystickButton(mainJoystick, 3).onTrue(new HomeCommand(drivetrain));
+    new JoystickButton(mainJoystick, 3).whileTrue(new HomeCommand(drivetrain));
 
     new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
 
+    new JoystickButton(mainJoystick, 5).whileTrue( new SetArmState(arm, Rotation2d.fromDegrees(90), new Rotation2d(Math.PI), new Rotation2d(Math.PI), false));
+    new JoystickButton(mainJoystick, 6).whileTrue( new SetArmState(arm, new Rotation2d(), new Rotation2d(), new Rotation2d(), false));
 
     //zero Gyro angle, counter drift during testing. Hopefully get a better gyro soon  (Will make a loop overrun warning)
     new JoystickButton(mainJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
@@ -134,12 +138,18 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-    Command fullAuto = autoBuilder.fullAuto(pathGroup);
+    // Command fullAuto = autoBuilder.fullAuto(pathGroup);
 
     return new SequentialCommandGroup(
-      // new HomeCommand(drivetrain),
-      fullAuto,
-      new InstantCommand(() -> SmartDashboard.putBoolean("triggered", false))
+      new SetArmState(arm, new Rotation2d(),new Rotation2d(), new Rotation2d(), false),
+      new SetArmState(arm, Rotation2d.fromDegrees(90), new Rotation2d(), new Rotation2d(), false),
+      new SetArmState(arm, Rotation2d.fromDegrees(90), new Rotation2d(), Rotation2d.fromDegrees(90), false),
+      new SetArmState(arm, new Rotation2d(), new Rotation2d(), new Rotation2d(), false),
+      new SetArmState(arm, new Rotation2d(Math.PI), new Rotation2d(Math.PI), new Rotation2d(Math.PI), false),
+      new SetArmState(arm, new Rotation2d(), new Rotation2d(), new Rotation2d(), false)
+
+
+
     );
 
   }

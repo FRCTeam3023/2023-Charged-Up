@@ -253,7 +253,7 @@ public class SwerveModule {
     }
 
     public SwerveModulePosition getPosition(){
-        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition(), getAngle());
+        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() / Constants.FALCON_UNITS_PER_REV * (1/ModuleConstants.DRIVE_GEARING) * (Math.PI * ModuleConstants.WHEEL_DIA), getAngle());
     }
 
     /**
