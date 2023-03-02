@@ -22,7 +22,7 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
 
     //Max radians/sec that the bot will rotate at
-    public static final double MAX_ANGULAR_SPEED = 4;
+    public static final double MAX_ANGULAR_SPEED = 2;
     //acceleration of rotation, rad/sec^2
     public static final double MAX_ANGULAR_ACCELERATION = 16;
 
@@ -43,7 +43,7 @@ public final class Constants {
         public static final double DRIVE_GEARING = 7; 
         public static final double WHEEL_DIA = 4; //in inches
         public static final double TURN_GEARING = 2.89 * 2.89 * 6;
-        public static final double MAX_SPEED = 7; 
+        public static final double MAX_SPEED = 3; 
 
         //module offsets for the zero position for each wheel, in this order
         //Front Left - Front Right - Back Left - Back Right
@@ -98,7 +98,7 @@ public final class Constants {
 
     public static class ArmConstants {
         public static final double BASE_GEAR_RATIO = 30 * (72/20) * (50/20);
-        public static final double ELBOW_GEAR_RATIO = 100; 
+        public static final double ELBOW_GEAR_RATIO = 100*2; 
         public static final double WRIST_GEAR_RATIO = 100;
         public static final double WRIST_PULLEY_RATIO = 1;
         public static final double CLAW_GEAR_RATIO = 100;

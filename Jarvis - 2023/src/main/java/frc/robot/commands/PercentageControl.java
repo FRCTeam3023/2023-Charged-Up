@@ -12,10 +12,12 @@ import frc.robot.subsystems.Drivetrain;
 public class PercentageControl extends CommandBase {
   private Arm arm;
   private Joystick joystick;
+  private Joystick secondaryJoystick;
   /** Creates a new JoystickControl. */
-  public PercentageControl(Drivetrain drivetrain, Arm arm, Joystick joystick) {
+  public PercentageControl(Drivetrain drivetrain, Arm arm, Joystick joystick, Joystick secondaryJoystick) {
     this.arm = arm;
     this.joystick = joystick;
+    this.secondaryJoystick = secondaryJoystick;
 
     addRequirements(arm);
     addRequirements(drivetrain);
@@ -28,40 +30,52 @@ public class PercentageControl extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    arm.setBaseMotorOutput(joystick.getY() * Arm.baseSpeedLimit);
+    arm.setBaseMotorOutput(-joystick.getY() * Arm.baseSpeedLimit);
 
-    arm.setElbowMotorOutput(joystick.getX() * Arm.elbowSpeedLimit);
+    arm.setElbowMotorOutput(-secondaryJoystick.getY() * Arm.elbowSpeedLimit);
 
-    if(joystick.getRawButton(8)){
-      arm.setWristMotorOutput(0.2);
-    }else if(joystick.getRawButton(10)){
-      arm.setWristMotorOutput(-0.2);
+    if((secondaryJoystick.getPOV() < 90 || secondaryJoystick.getPOV() > 270) && secondaryJoystick.getPOV() >= 0){
+      arm.setWristMotorOutput(0.15);
+
+    }else if(secondaryJoystick.getPOV() > 90 && secondaryJoystick.getPOV() < 270){
+      arm.setWristMotorOutput(-0.15);
+
     }else{
       arm.setWristMotorOutput(0);
     }
 
-    if(joystick.getRawButton(9)){
-      arm.setClawMotorOutput(0.5);
 
-    }else if(joystick.getRawButton(11)){
-      arm.setClawMotorOutput(-.5);
+
+    // if(joystick.getRawButton(8)){
+    //   arm.setWristMotorOutput(0.2);
+    // }else if(joystick.getRawButton(10)){
+    //   arm.setWristMotorOutput(-0.2);
+    // }else{
+    //   arm.setWristMotorOutput(0);
+    // }
+
+    if(secondaryJoystick.getRawButton(2)){
+      arm.setClawMotorOutput(0.3);
+
+    }else if(secondaryJoystick.getRawButton(1)){
+      arm.setClawMotorOutput(-.3);
     }else{
       arm.setClawMotorOutput(0);
     }
 
 
-    if(joystick.getRawButtonPressed(5)){
-      Arm.baseSpeedLimit = Arm.baseSpeedLimit + 0.05;
-    }
-    if(joystick.getRawButtonPressed(6)){
-      Arm.baseSpeedLimit = Arm.baseSpeedLimit - 0.05;
-    }
+    // if(joystick.getRawButtonPressed(5)){
+    //   Arm.baseSpeedLimit = Arm.baseSpeedLimit + 0.05;
+    // }
+    // if(joystick.getRawButtonPressed(6)){
+    //   Arm.baseSpeedLimit = Arm.baseSpeedLimit - 0.05;
+    // }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    arm.setBaseMotorOutput(0);
+    arm.stopAllMotors();
   }
 
   // Returns true when the command should end.

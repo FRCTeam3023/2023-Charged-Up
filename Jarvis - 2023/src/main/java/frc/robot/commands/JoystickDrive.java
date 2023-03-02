@@ -49,13 +49,15 @@ public class JoystickDrive extends CommandBase {
     if(Math.abs(ySpeed) < .15) ySpeed = 0;
     if(Math.abs(rot) < 0.75) rot = 0;
 
-    drivetrain.drive(xSpeed, ySpeed, rot, false);
+    drivetrain.drive(xSpeed, ySpeed, rot, true);
 
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    drivetrain.stopModules();
+  }
 
   // Returns true when the command should end.
   @Override

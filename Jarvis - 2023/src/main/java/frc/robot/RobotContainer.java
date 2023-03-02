@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.HoldState;
 import frc.robot.commands.HomeCommand;
 import frc.robot.commands.JoystickDrive;
 import frc.robot.commands.PercentageControl;
@@ -49,19 +50,28 @@ public class RobotContainer {
   private final Arm arm = new Arm();
 
   private final Joystick mainJoystick = new Joystick(1);
+  private final Joystick secondaryJoystick = new Joystick(0);
   
   private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, mainJoystick);
   private final PositionControl positionControl = new PositionControl(drivetrain, arm, mainJoystick);
-  private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, mainJoystick);
+  private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, mainJoystick, secondaryJoystick);
+  private final HoldState holdState = new HoldState(arm);
 
 
   // This will load the file "Simple Path.path" and generate it with a max velocity of 2 m/s and a max acceleration of 1 m/s^2
   // for every path in the group
-  List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup("Simple Path", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> overLineInnerPath = PathPlanner.loadPathGroup("Over Line - Inner", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> overLineOuterPath = PathPlanner.loadPathGroup("Over Line - Outer", new PathConstraints(3, 1.5));
+
 
   // This is just an example event map. It would be better to have a constant, global event map
   // in your code that will be used by all path following commands.
   HashMap<String, Command> eventMap = new HashMap<>();
+  eventMap.put("Home Modules", new HomeCommand(drivetrain));
+
+  
+
+  
 
 
   // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
@@ -85,6 +95,7 @@ public class RobotContainer {
 
     PathPlannerServer.startServer(5811);
     drivetrain.setDefaultCommand(joystickDrive);
+    arm.setDefaultCommand(holdState);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -119,11 +130,15 @@ public class RobotContainer {
 
     new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
 
-    new JoystickButton(mainJoystick, 5).whileTrue( new SetArmState(arm, Rotation2d.fromDegrees(90), new Rotation2d(Math.PI), new Rotation2d(Math.PI), false));
-    new JoystickButton(mainJoystick, 6).whileTrue( new SetArmState(arm, new Rotation2d(), new Rotation2d(), new Rotation2d(), false));
 
     //zero Gyro angle, counter drift during testing. Hopefully get a better gyro soon  (Will make a loop overrun warning)
     new JoystickButton(mainJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
+
+    new JoystickButton(mainJoystick, 12).onTrue(new InstantCommand(() -> arm.zeroEncoders()));
+
+    new JoystickButton(mainJoystick, 5).onTrue(new InstantCommand(() -> arm.setClawMotorOutput(0.25)).andThen(() -> arm.stopAllMotors()));
+
+    new JoystickButton(secondaryJoystick, 4).onTrue(new SetArmState(arm, new ArmState()));
 
 
     
@@ -141,13 +156,11 @@ public class RobotContainer {
     // Command fullAuto = autoBuilder.fullAuto(pathGroup);
 
     return new SequentialCommandGroup(
-      new SetArmState(arm, new Rotation2d(),new Rotation2d(), new Rotation2d(), false),
-      new SetArmState(arm, Rotation2d.fromDegrees(90), new Rotation2d(), new Rotation2d(), false),
-      new SetArmState(arm, Rotation2d.fromDegrees(90), new Rotation2d(), Rotation2d.fromDegrees(90), false),
-      new SetArmState(arm, new Rotation2d(), new Rotation2d(), new Rotation2d(), false),
-      new SetArmState(arm, new Rotation2d(Math.PI), new Rotation2d(Math.PI), new Rotation2d(Math.PI), false),
-      new SetArmState(arm, new Rotation2d(), new Rotation2d(), new Rotation2d(), false)
-
+      new SetArmState(arm, new ArmState()),
+      new SetArmState(arm, new ArmState(new Rotation2d(),new Rotation2d(Math.PI/4),new Rotation2d(),0)),
+      new SetArmState(arm, new ArmState(new Rotation2d(Math.PI/4),new Rotation2d(Math.PI/4),new Rotation2d(Math.PI/4),0)),
+      new SetArmState(arm, new ArmState(new Rotation2d(), new Rotation2d(Math.PI/4), new Rotation2d(), 0)),
+      new SetArmState(arm, new ArmState())
 
 
     );

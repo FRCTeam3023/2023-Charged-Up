@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.ArmState;
 import frc.robot.Constants;
 import frc.robot.Gains;
 import frc.robot.Constants.ArmConstants;
@@ -24,19 +25,21 @@ public class Arm extends SubsystemBase {
 
   private TalonFX baseMotor = new TalonFX(10);
   private TalonFX elbowMotor = new TalonFX(11);
-  private TalonSRX wristMotor = new TalonSRX(12);
-  private TalonSRX clawMotor = new TalonSRX(13);
+  private TalonSRX wristMotor = new TalonSRX(13);
+  private TalonSRX clawMotor = new TalonSRX(12);
 
 
-  public static double elbowSpeedLimit = 0.2;
-  public static double baseSpeedLimit = 0.25;
+  public static double elbowSpeedLimit = 0.5;
+  public static double baseSpeedLimit = 0.5;
 
-  public Gains baseJointGains = new Gains(20, 0, 0, 0,0, 0.5);
+  public Gains baseJointGains = new Gains(20, 0, 0, 0,0, 0.25);
 
-  public Gains elbowJointGains = new Gains(20, 0, 10, 0, 0, 0.75);
+  public Gains elbowJointGains = new Gains(20, 0, 10, 0, 0, 0.30);
 
-  public Gains wristJointGains = new Gains(20, 0, 0, 0, 0, 0.5);
+  public Gains wristJointGains = new Gains(10, 0, 0, 0, 0, 0.5);
   public Gains clawJointGains = new Gains(0, 0, 0, 0, 0, 0);
+
+  public ArmState currentState = new ArmState();
 
 
 
@@ -59,7 +62,7 @@ public class Arm extends SubsystemBase {
     baseMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.F);
 
     baseMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.PeakOutput);
-    baseMotor.configClosedloopRamp(0.1);
+    baseMotor.configClosedloopRamp(1.5);
 
     baseMotor.setSelectedSensorPosition(0);
 
@@ -82,7 +85,7 @@ public class Arm extends SubsystemBase {
     elbowMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.F);
 
     elbowMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.PeakOutput);
-    elbowMotor.configClosedloopRamp(0.1);
+    elbowMotor.configClosedloopRamp(1.5);
 
     elbowMotor.setSelectedSensorPosition(0);
 
@@ -102,6 +105,7 @@ public class Arm extends SubsystemBase {
     wristMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.F);
 
     wristMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.PeakOutput);
+    wristMotor.configClosedloopRamp(0.25);
 
     //------------------------------------------------------------------
 
@@ -120,16 +124,22 @@ public class Arm extends SubsystemBase {
 
     // clawMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.PeakOutput);
 
+
+    currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
+
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Arm Angle", getBaseJointPos().getDegrees());
-    SmartDashboard.putNumber("Elbow Angle", getElbowMotorPos().getDegrees());
-    SmartDashboard.putNumber("Wrist Angle", getWristMotorPos().getDegrees());
+    SmartDashboard.putNumber("Arm Angle", getBaseJointPosition().getDegrees());
+    SmartDashboard.putNumber("Elbow Angle", getElbowJointPosition().getDegrees());
+    SmartDashboard.putNumber("Wrist Angle", getWristJointPosition().getDegrees());
 
     SmartDashboard.putNumber("Error", baseMotor.getClosedLoopError());
     // This method will be called once per scheduler run
+
+    currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
+
   }
 
   @Override
@@ -138,29 +148,26 @@ public class Arm extends SubsystemBase {
   }
 
 
-  public void setArmState(Rotation2d basePos, Rotation2d elbowPos, Rotation2d wristPos, boolean clawClosed){
-    setBaseMotorPosition(basePos);
-    setElbowMotorPosition(elbowPos);
-    setWristMotorPos(wristPos);
+  public void setArmState(ArmState state){
+    setBaseJointPosition(state.baseJointPosition);
+    setElbowJointPosition(state.elbowJointPosition);
+    setWristJointPosition(state.wristJointPosition);
 
-    if(clawClosed){
+    if(state.clawClosed){
       setClawMotorOutput(0.2);
-      if(getClawPosition() > 1){
-        setClawMotorOutput(0);
+      if(getClawPosition() > 0.95){
+        setClawPosition(1);
       }
+
+
     }else{
-      setClawMotorPos(0);
+      setClawPosition(0);
     }
 
-  }
-
-  public void setArmState(Rotation2d basePos, Rotation2d elbowPos, Rotation2d wristPos, double clawPos){
-    setBaseMotorPosition(basePos);
-    setElbowMotorPosition(elbowPos);
-    setWristMotorPos(wristPos);
-    setClawMotorPos(clawPos);
 
   }
+
+
 
   /**
    * Sets the base joint to a specific percent output
@@ -175,7 +182,7 @@ public class Arm extends SubsystemBase {
    * 0 degrees is vertical, pos forward
    * @param angle target angle
    */
-  public void setBaseMotorPosition(Rotation2d angle){
+  public void setBaseJointPosition(Rotation2d angle){
     baseMotor.set(ControlMode.Position, angle.getDegrees());
   }
 
@@ -183,7 +190,7 @@ public class Arm extends SubsystemBase {
    * 
    * @return the position of the base joint
    */
-  public Rotation2d getBaseJointPos(){
+  public Rotation2d getBaseJointPosition(){
     return Rotation2d.fromDegrees(baseMotor.getSelectedSensorPosition());
   }
 
@@ -202,7 +209,7 @@ public class Arm extends SubsystemBase {
    * 0 degrees is straight down.
    * @param angle
    */
-  public void setElbowMotorPosition(Rotation2d angle){
+  public void setElbowJointPosition(Rotation2d angle){
     elbowMotor.set(ControlMode.Position, angle.getDegrees());
   }
 
@@ -210,7 +217,7 @@ public class Arm extends SubsystemBase {
    * get Elbow position
    * @return
    */
-  public Rotation2d getElbowMotorPos(){
+  public Rotation2d getElbowJointPosition(){
     return Rotation2d.fromDegrees(elbowMotor.getSelectedSensorPosition());
   }
 
@@ -219,11 +226,11 @@ public class Arm extends SubsystemBase {
     wristMotor.set(ControlMode.PercentOutput, percentOutput);
   }
 
-  public void setWristMotorPos(Rotation2d angle){
+  public void setWristJointPosition(Rotation2d angle){
     wristMotor.set(ControlMode.Position, angle.getDegrees());
   }
 
-  public Rotation2d getWristMotorPos() {
+  public Rotation2d getWristJointPosition() {
     return Rotation2d.fromDegrees(wristMotor.getSelectedSensorPosition());
   }
 
@@ -234,16 +241,37 @@ public class Arm extends SubsystemBase {
     clawMotor.set(ControlMode.PercentOutput, percentOutput);
   }
 
-  public void setClawMotorPos(double closePercent){
+  public void setClawPosition(double closePercent){
     clawMotor.set(ControlMode.Position, closePercent);
 
   }
 
   public double getClawPosition(){
-    return clawMotor.getSelectedSensorPosition();
+    return clawMotor.getSelectedSensorPosition() ;
+  }
+
+  public boolean getClawClosed(){
+    if(clawMotor.getSelectedSensorPosition() > 0.1){
+      return true;
+    }
+
+    return false;
   }
 
   public double getBaseError(){
     return baseMotor.getClosedLoopError();
+  }
+
+  public void stopAllMotors(){
+    baseMotor.set(ControlMode.PercentOutput, 0);
+    elbowMotor.set(ControlMode.PercentOutput, 0);
+    wristMotor.set(ControlMode.PercentOutput, 0);
+    clawMotor.set(ControlMode.PercentOutput, 0);
+  }
+
+  public void zeroEncoders(){
+    baseMotor.setSelectedSensorPosition(0);
+    elbowMotor.setSelectedSensorPosition(0);
+
   }
 }

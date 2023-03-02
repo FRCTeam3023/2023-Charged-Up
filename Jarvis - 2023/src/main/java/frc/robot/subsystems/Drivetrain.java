@@ -313,5 +313,9 @@ public class Drivetrain extends SubsystemBase {
     return targetPose;
   }
 
+  public Rotation2d getPitch(){
+    return Rotation2d.fromDegrees(gyro.getYComplementaryAngle());
+  }
+
 
 }

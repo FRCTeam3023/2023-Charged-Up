@@ -9,27 +9,26 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ArmState;
 import frc.robot.subsystems.Arm;
 
-public class SetArmState extends CommandBase {
-  /** Creates a new SetArmState. */
-  private Arm arm;
-  private ArmState targetState;
-
-  public SetArmState(Arm arm, ArmState targetState) {
+public class HoldState extends CommandBase {
+  /** Creates a new HoldState. */
+  Arm arm;
+  ArmState stateToHold;
+  public HoldState(Arm arm) {
+    // Use addRequirements() here to declare subsystem dependencies.
     this.arm = arm;
-    this.targetState = targetState;
     addRequirements(arm);
-
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    stateToHold = new ArmState(arm.currentState.baseJointPosition, arm.currentState.elbowJointPosition, arm.currentState.wristJointPosition, 0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    arm.setArmState(targetState);
+    arm.setArmState(stateToHold);
   }
 
   // Called once the command ends or is interrupted.
@@ -41,13 +40,6 @@ public class SetArmState extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(
-    Math.abs(arm.getBaseJointPosition().minus(targetState.baseJointPosition).getDegrees()) < 5 &&
-    Math.abs(arm.getElbowJointPosition().minus(targetState.elbowJointPosition).getDegrees()) < 5 &&
-    Math.abs(arm.getWristJointPosition().minus(targetState.wristJointPosition).getDegrees()) < 5
-    ){
-      return true;
-    }
     return false;
   }
 }

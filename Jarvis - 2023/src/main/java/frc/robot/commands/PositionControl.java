@@ -18,6 +18,7 @@ public class PositionControl extends CommandBase {
   private Joystick joystick;
 
   private Rotation2d startPos = new Rotation2d();
+  private Rotation2d elbowStart = new Rotation2d();
 
 
 
@@ -32,17 +33,18 @@ public class PositionControl extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    startPos = arm.getBaseJointPos();
+    startPos = arm.getBaseJointPosition();
+    elbowStart = arm.getElbowJointPosition();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     Rotation2d joystickPosition = Rotation2d.fromDegrees(45*joystick.getY());
-    arm.setBaseMotorPosition(startPos.plus(joystickPosition));
+    arm.setBaseJointPosition(startPos.plus(joystickPosition));
 
     Rotation2d joystickXPos = Rotation2d.fromDegrees(45 * joystick.getX());
-    arm.setWristMotorPos(joystickXPos);
+    arm.setElbowJointPosition(elbowStart.plus(joystickXPos));
 
     SmartDashboard.putNumber("Target Pos", startPos.plus(joystickPosition).getDegrees());
     
@@ -51,7 +53,7 @@ public class PositionControl extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    arm.setBaseMotorOutput(0);
+    arm.stopAllMotors();
   }
 
   // Returns true when the command should end.
