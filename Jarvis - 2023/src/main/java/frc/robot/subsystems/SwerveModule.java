@@ -37,7 +37,7 @@ public class SwerveModule {
     private Gains turnGains = new Gains(.8,0,0,0,0,1);
 
 
-    private Gains driveGains = new Gains(0.05,0,0,0.046,0,1);
+    private Gains driveGains = new Gains(0.05,0,0,0.08,0,1);
 
     private boolean homeStatus = false;
     public boolean homeFinished = false;
@@ -68,7 +68,7 @@ public class SwerveModule {
 
         //Reset, basic config
         driveMotor.configFactoryDefault();
-        driveMotor.setNeutralMode(NeutralMode.Coast);
+        driveMotor.setNeutralMode(NeutralMode.Brake);
         driveMotor.set(ControlMode.PercentOutput, 0);
         driveMotor.configClosedloopRamp(0.25);
 
@@ -253,7 +253,7 @@ public class SwerveModule {
     }
 
     public SwerveModulePosition getPosition(){
-        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() / Constants.FALCON_UNITS_PER_REV * (1/ModuleConstants.DRIVE_GEARING) * (Math.PI * ModuleConstants.WHEEL_DIA), getAngle());
+        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() / Constants.FALCON_UNITS_PER_REV * (1/ModuleConstants.DRIVE_GEARING) * (Units.inchesToMeters(Math.PI * ModuleConstants.WHEEL_DIA)), getAngle());
     }
 
     /**

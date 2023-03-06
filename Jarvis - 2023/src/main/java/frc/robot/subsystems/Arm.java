@@ -34,10 +34,10 @@ public class Arm extends SubsystemBase {
 
   public Gains baseJointGains = new Gains(20, 0, 0, 0,0, 0.25);
 
-  public Gains elbowJointGains = new Gains(20, 0, 10, 0, 0, 0.30);
+  public Gains elbowJointGains = new Gains(25, 0, 10, 0, 0, 0.30);
 
-  public Gains wristJointGains = new Gains(10, 0, 0, 0, 0, 0.5);
-  public Gains clawJointGains = new Gains(0, 0, 0, 0, 0, 0);
+  public Gains wristJointGains = new Gains(15, 0, 0, 0, 0, 0.25);
+  public Gains clawJointGains = new Gains(20, 0, 0, 0, 0, 0.5);
 
   public ArmState currentState = new ArmState();
 
@@ -105,24 +105,25 @@ public class Arm extends SubsystemBase {
     wristMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.F);
 
     wristMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.PeakOutput);
-    wristMotor.configClosedloopRamp(0.25);
+    wristMotor.configClosedloopRamp(1.5);
 
     //------------------------------------------------------------------
 
     clawMotor.configFactoryDefault();
     clawMotor.setNeutralMode(NeutralMode.Brake); 
     clawMotor.set(ControlMode.PercentOutput,0);
-    clawMotor.setInverted(false);
+    clawMotor.setInverted(true);
 
-    // clawMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-    // clawMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * (1/ArmConstants.CLAW_PULLEY_RATIO) * 360);
+    clawMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    clawMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * (1/ArmConstants.CLAW_PULLEY_RATIO) * 360);
 
-    // clawMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.P);
-    // clawMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.I);
-    // clawMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.D);
-    // clawMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.F);
+    clawMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.P);
+    clawMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.I);
+    clawMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.D);
+    clawMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.F);
 
-    // clawMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.PeakOutput);
+    clawMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, clawJointGains.PeakOutput);
+    resetClawPos(0);
 
 
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
@@ -134,9 +135,7 @@ public class Arm extends SubsystemBase {
     SmartDashboard.putNumber("Arm Angle", getBaseJointPosition().getDegrees());
     SmartDashboard.putNumber("Elbow Angle", getElbowJointPosition().getDegrees());
     SmartDashboard.putNumber("Wrist Angle", getWristJointPosition().getDegrees());
-
-    SmartDashboard.putNumber("Error", baseMotor.getClosedLoopError());
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Claw Position", getClawPosition());
 
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
 
@@ -152,19 +151,19 @@ public class Arm extends SubsystemBase {
     setBaseJointPosition(state.baseJointPosition);
     setElbowJointPosition(state.elbowJointPosition);
     setWristJointPosition(state.wristJointPosition);
+    setClawState(state.clawClosed);
+  }
 
-    if(state.clawClosed){
-      setClawMotorOutput(0.2);
-      if(getClawPosition() > 0.95){
-        setClawPosition(1);
+  public void setClawState(boolean isClosed){
+    if(isClosed){
+      if(getClawPosition() > ArmConstants.CLAW_CLOSE_THRESHOLD){
+        setClawPosition(ArmConstants.CLAW_CLOSE_LIMIT);
+      }else{
+        setClawMotorOutput(ArmConstants.CLAW_CLOSING_OUTPUT);
       }
-
-
     }else{
       setClawPosition(0);
     }
-
-
   }
 
 
@@ -247,7 +246,7 @@ public class Arm extends SubsystemBase {
   }
 
   public double getClawPosition(){
-    return clawMotor.getSelectedSensorPosition() ;
+    return clawMotor.getSelectedSensorPosition();
   }
 
   public boolean getClawClosed(){
@@ -273,5 +272,13 @@ public class Arm extends SubsystemBase {
     baseMotor.setSelectedSensorPosition(0);
     elbowMotor.setSelectedSensorPosition(0);
 
+  }
+
+  public void zeroClawPos(){
+    clawMotor.setSelectedSensorPosition(0);
+  }
+
+  public void resetClawPos(double position){
+    clawMotor.setSelectedSensorPosition(position);
   }
 }

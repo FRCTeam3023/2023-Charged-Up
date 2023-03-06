@@ -40,10 +40,18 @@ public class JoystickDrive extends CommandBase {
   public void execute() {
     //take joystick inputs scaled to the max speed of the bot
     //desaturation will lead to never exeeding max on diagonals 
+
+    if(joystick.getRawButton(1)){
+      xSpeed = -joystick.getY() * ModuleConstants.FAST_MAX_SPEED;
+      ySpeed = -joystick.getX() * ModuleConstants.FAST_MAX_SPEED;
+      rot = -joystick.getTwist() * Constants.FAST_MAX_ANGULAR_SPEED;
+    }else{
+      xSpeed = -joystick.getY() * ModuleConstants.MAX_SPEED;
+      ySpeed = -joystick.getX() * ModuleConstants.MAX_SPEED;
+      rot = -joystick.getTwist() * Constants.MAX_ANGULAR_SPEED;
+    }
     
-    xSpeed = -joystick.getY() * ModuleConstants.MAX_SPEED;
-    ySpeed = -joystick.getX() * ModuleConstants.MAX_SPEED;
-    rot = -joystick.getTwist() * Constants.MAX_ANGULAR_SPEED;
+   
 
     if(Math.abs(xSpeed) < .15) xSpeed = 0;
     if(Math.abs(ySpeed) < .15) ySpeed = 0;

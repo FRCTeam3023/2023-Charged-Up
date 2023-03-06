@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -23,6 +24,7 @@ public final class Constants {
 
     //Max radians/sec that the bot will rotate at
     public static final double MAX_ANGULAR_SPEED = 2;
+    public static final double FAST_MAX_ANGULAR_SPEED = 3;
     //acceleration of rotation, rad/sec^2
     public static final double MAX_ANGULAR_ACCELERATION = 16;
 
@@ -43,7 +45,8 @@ public final class Constants {
         public static final double DRIVE_GEARING = 7; 
         public static final double WHEEL_DIA = 4; //in inches
         public static final double TURN_GEARING = 2.89 * 2.89 * 6;
-        public static final double MAX_SPEED = 3; 
+        public static final double MAX_SPEED = 2; 
+        public static final double FAST_MAX_SPEED = 5;
 
         //module offsets for the zero position for each wheel, in this order
         //Front Left - Front Right - Back Left - Back Right
@@ -104,7 +107,24 @@ public final class Constants {
         public static final double CLAW_GEAR_RATIO = 100;
         public static final double CLAW_PULLEY_RATIO = 1;
 
-        public static final double CLAW_CLOSING_OUTPUT = 0.3;
+        public static final double CLAW_CLOSING_OUTPUT = 0.2;
+        public static final double CLAW_CLOSE_THRESHOLD = 20;
+        public static final double CLAW_CLOSE_LIMIT = 300;
+        public static final double CUBE_CLAW_OFFSET = 220;
+        public static final double CONE_CLAW_OFFSET = 260;
+
+
+        public static final ArmState NEUTRAL_STATE = new ArmState(Rotation2d.fromDegrees(15), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0), 250);
+        public static final ArmState PRE_LOW_SCORE_STATE = new ArmState(new Rotation2d(), Rotation2d.fromDegrees(22), Rotation2d.fromDegrees(40), 250);
+        public static final ArmState LOW_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(37), Rotation2d.fromDegrees(22), Rotation2d.fromDegrees(40), 250);
+        public static final ArmState PRE_MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(150), 250);
+        public static final ArmState MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(200), 250);
+        public static final ArmState HIGH_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(54),Rotation2d.fromDegrees(130),Rotation2d.fromDegrees(290),250);
+        public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(39),Rotation2d.fromDegrees(105),Rotation2d.fromDegrees( 185),0);
+        public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(0), 250);
+
+
+
       }
     
 

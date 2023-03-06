@@ -13,6 +13,8 @@ public class PercentageControl extends CommandBase {
   private Arm arm;
   private Joystick joystick;
   private Joystick secondaryJoystick;
+  
+  private boolean clawState;
   /** Creates a new JoystickControl. */
   public PercentageControl(Drivetrain drivetrain, Arm arm, Joystick joystick, Joystick secondaryJoystick) {
     this.arm = arm;
@@ -34,42 +36,29 @@ public class PercentageControl extends CommandBase {
 
     arm.setElbowMotorOutput(-secondaryJoystick.getY() * Arm.elbowSpeedLimit);
 
+
+
     if((secondaryJoystick.getPOV() < 90 || secondaryJoystick.getPOV() > 270) && secondaryJoystick.getPOV() >= 0){
-      arm.setWristMotorOutput(0.15);
+      arm.setWristMotorOutput(0.25);
 
     }else if(secondaryJoystick.getPOV() > 90 && secondaryJoystick.getPOV() < 270){
-      arm.setWristMotorOutput(-0.15);
+      arm.setWristMotorOutput(-0.25);
 
     }else{
       arm.setWristMotorOutput(0);
     }
 
 
-
-    // if(joystick.getRawButton(8)){
-    //   arm.setWristMotorOutput(0.2);
-    // }else if(joystick.getRawButton(10)){
-    //   arm.setWristMotorOutput(-0.2);
-    // }else{
-    //   arm.setWristMotorOutput(0);
-    // }
-
-    if(secondaryJoystick.getRawButton(2)){
+    if(secondaryJoystick.getRawButton(8)){
       arm.setClawMotorOutput(0.3);
-
-    }else if(secondaryJoystick.getRawButton(1)){
-      arm.setClawMotorOutput(-.3);
-    }else{
+    }else if(secondaryJoystick.getRawButton(10)){
+      arm.setClawMotorOutput(-0.2);
+    } else{
       arm.setClawMotorOutput(0);
     }
 
 
-    // if(joystick.getRawButtonPressed(5)){
-    //   Arm.baseSpeedLimit = Arm.baseSpeedLimit + 0.05;
-    // }
-    // if(joystick.getRawButtonPressed(6)){
-    //   Arm.baseSpeedLimit = Arm.baseSpeedLimit - 0.05;
-    // }
+
   }
 
   // Called once the command ends or is interrupted.

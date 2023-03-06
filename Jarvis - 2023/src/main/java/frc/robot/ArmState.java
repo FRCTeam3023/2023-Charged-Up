@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Constants.ArmConstants;
 
 /** Add your docs here. */
 public class ArmState {
@@ -31,7 +32,7 @@ public class ArmState {
         this.elbowJointPosition = elbowJointPos;
         this.wristJointPosition = wristJointPos;
         this.clawPos = clawPos;
-        if(clawPos > 0.1){
+        if(clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD){
             clawClosed = true;
         }
     }
@@ -41,9 +42,10 @@ public class ArmState {
         this.elbowJointPosition = elbowJointPos;
         this.wristJointPosition = wristJointPos;
         this.clawPos = clawPos;
-        if(clawPos > 0.1){
-            clawClosed = true;
-        }
+        clawClosed = clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD;
+        // if(clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD){
+        //     clawClosed = true;
+        // }
     }
 
     

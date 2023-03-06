@@ -2,45 +2,49 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 4.5194263284389615,
-        "y": 0.6518211039275126
+        "x": 2.541092100729137,
+        "y": 2.8817354068374326
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.519426328438961,
-        "y": 0.6518211039275126
+        "x": 3.5410921007291365,
+        "y": 2.8817354068374326
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Home Modules"
+          "Home Modules",
+          "Clearance State",
+          "Set Claw Cone"
         ],
-        "executionBehavior": "sequential",
+        "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
       }
     },
     {
       "anchorPoint": {
-        "x": 5.903116742039475,
-        "y": 0.6975629357820756
+        "x": 3.7189442709841196,
+        "y": 2.8817354068374326
       },
       "prevControl": {
-        "x": 4.903116742039475,
-        "y": 0.6975629357820756
+        "x": 2.7189442709841196,
+        "y": 2.8817354068374326
       },
       "nextControl": null,
-      "holonomicAngle": 0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Charge Station Balance"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0

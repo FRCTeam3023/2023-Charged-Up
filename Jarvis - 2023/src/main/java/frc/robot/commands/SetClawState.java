@@ -4,44 +4,43 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.ArmState;
 import frc.robot.subsystems.Arm;
 
-public class HoldState extends CommandBase {
-  /** Creates a new HoldState. */
+public class SetClawState extends CommandBase {
+  /** Creates a new SetClawState. */
   Arm arm;
-  ArmState stateToHold;
-
-  public HoldState(Arm arm) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  boolean clawClosed;
+  public SetClawState(Arm arm, boolean clawClosed) {
     this.arm = arm;
+    this.clawClosed = clawClosed;
+    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    stateToHold = new ArmState(arm.currentState.baseJointPosition, arm.currentState.elbowJointPosition, arm.currentState.wristJointPosition, arm.currentState.clawPos);
+    System.out.println("starting claw state: " + clawClosed );
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    arm.setArmState(stateToHold);
+    arm.setClawState(clawClosed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    arm.stopAllMotors();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    // if(arm.currentState.clawClosed == clawClosed){
+    //   return true;
+    // }
+    return arm.currentState.clawClosed == clawClosed;
   }
 }

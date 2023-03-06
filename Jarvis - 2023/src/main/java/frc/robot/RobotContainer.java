@@ -20,18 +20,22 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.commands.ArmControl;
 import frc.robot.commands.HoldState;
 import frc.robot.commands.HomeCommand;
 import frc.robot.commands.JoystickDrive;
+import frc.robot.commands.LevelChargeStation;
 import frc.robot.commands.PercentageControl;
-import frc.robot.commands.PositionControl;
 import frc.robot.commands.SetArmState;
+import frc.robot.commands.SetClawState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 
@@ -53,24 +57,31 @@ public class RobotContainer {
   private final Joystick secondaryJoystick = new Joystick(0);
   
   private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, mainJoystick);
-  private final PositionControl positionControl = new PositionControl(drivetrain, arm, mainJoystick);
   private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, mainJoystick, secondaryJoystick);
   private final HoldState holdState = new HoldState(arm);
+  private final HomeCommand homeCommand = new HomeCommand(drivetrain);
+  private final LevelChargeStation levelChargeStation = new LevelChargeStation(drivetrain);
+  private final ArmControl armControl = new ArmControl(arm, secondaryJoystick);
 
 
   // This will load the file "Simple Path.path" and generate it with a max velocity of 2 m/s and a max acceleration of 1 m/s^2
   // for every path in the group
   List<PathPlannerTrajectory> overLineInnerPath = PathPlanner.loadPathGroup("Over Line - Inner", new PathConstraints(3, 1.5));
   List<PathPlannerTrajectory> overLineOuterPath = PathPlanner.loadPathGroup("Over Line - Outer", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> balacePath = PathPlanner.loadPathGroup("Balance", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> cubeBalance = PathPlanner.loadPathGroup("1 Cube - Balance", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> cubeOuter = PathPlanner.loadPathGroup("1 Cube - Outer", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> cubeInner = PathPlanner.loadPathGroup("1 Cube - Inner", new PathConstraints(3, 1.5));
+  
+
 
 
   // This is just an example event map. It would be better to have a constant, global event map
   // in your code that will be used by all path following commands.
   HashMap<String, Command> eventMap = new HashMap<>();
-  eventMap.put("Home Modules", new HomeCommand(drivetrain));
 
   
-
+  SendableChooser<List<PathPlannerTrajectory>> autoChooser = new SendableChooser<>();
   
 
 
@@ -89,13 +100,37 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    SmartDashboard.putBoolean("triggered", false);
-    eventMap.put("event", new InstantCommand(() -> SmartDashboard.putBoolean("triggered", true)));
-    eventMap.put("deployIntake", new HomeCommand(drivetrain));
+    autoChooser.setDefaultOption("Over Line - Inner", overLineInnerPath);
+    autoChooser.addOption("Over Line - Outer", overLineInnerPath);
+    autoChooser.addOption("Balance", balacePath);
+    autoChooser.addOption("1 Cube - Balance", cubeBalance);
+    autoChooser.addOption("1 Cube - Inner", cubeInner);
+    autoChooser.addOption("1 Cube - Outer", cubeOuter);
+    
+
+
+    SmartDashboard.putData(autoChooser);
+
+    eventMap.put("Home Modules", new HomeCommand(drivetrain));
+    eventMap.put("Neutral State", new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
+    eventMap.put("Low State", new SetArmState(arm, ArmConstants.LOW_SCORE_STATE));
+    eventMap.put("Mid State", new SetArmState(arm, ArmConstants.MID_SCORE_STATE));
+    eventMap.put("High State", new SequentialCommandGroup(
+      new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
+      new SetArmState(arm, ArmConstants.HIGH_SCORE_STATE)) );
+    eventMap.put("Clearance State", new SetArmState(arm, ArmConstants.CLEARANCE_STATE));
+    eventMap.put("Charge Station Balance", new LevelChargeStation(drivetrain));
+    eventMap.put("Open Claw", new SetClawState(arm, false));
+    eventMap.put("Set Claw Cube", new InstantCommand(() -> arm.resetClawPos(ArmConstants.CUBE_CLAW_OFFSET)));
+    eventMap.put("Set Claw Cone", new InstantCommand(() -> arm.resetClawPos(ArmConstants.CONE_CLAW_OFFSET)));
+
 
     PathPlannerServer.startServer(5811);
     drivetrain.setDefaultCommand(joystickDrive);
-    arm.setDefaultCommand(holdState);
+    arm.setDefaultCommand(armControl);
+
+
+
 
     // Configure the button bindings
     configureButtonBindings();
@@ -122,29 +157,63 @@ public class RobotContainer {
      */
 
 
-    new JoystickButton(mainJoystick, 1).whileTrue(positionControl);
-
     new JoystickButton(mainJoystick, 2).whileTrue(percentageControl);
 
-    new JoystickButton(mainJoystick, 3).whileTrue(new HomeCommand(drivetrain));
+    new JoystickButton(mainJoystick, 3).whileTrue(homeCommand);
 
-    new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
+    // new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
 
 
     //zero Gyro angle, counter drift during testing. Hopefully get a better gyro soon  (Will make a loop overrun warning)
     new JoystickButton(mainJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
-
     new JoystickButton(mainJoystick, 12).onTrue(new InstantCommand(() -> arm.zeroEncoders()));
 
-    new JoystickButton(mainJoystick, 5).onTrue(new InstantCommand(() -> arm.setClawMotorOutput(0.25)).andThen(() -> arm.stopAllMotors()));
 
-    new JoystickButton(secondaryJoystick, 4).onTrue(new SetArmState(arm, new ArmState()));
+    /*------------------------------------------------------------------------------------------- */
+
+
+    // new JoystickButton(secondaryJoystick, 1).whileTrue(new SetClawState(arm, true));
+    // new JoystickButton(secondaryJoystick, 2).whileTrue(new SetClawState(arm, false));
+
+
+
+    new JoystickButton(secondaryJoystick, 3).whileTrue(new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
+
+    new JoystickButton(secondaryJoystick, 5).whileTrue(
+      new SequentialCommandGroup(
+        new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
+        new SetArmState(arm, ArmConstants.PICKUP_STATE))
+    );
+
+    new JoystickButton(secondaryJoystick, 4).whileTrue(
+      new SequentialCommandGroup(
+        new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
+        new SetArmState(arm, ArmConstants.MID_SCORE_STATE))
+    );
+
+    new JoystickButton(secondaryJoystick, 6).whileTrue( 
+      new SequentialCommandGroup(
+        new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
+        new SetArmState(arm, ArmConstants.HIGH_SCORE_STATE)) 
+    );
+
+
+    new JoystickButton(secondaryJoystick, 8).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(0.2)).andThen(() -> arm.setClawMotorOutput(0)));
+    new JoystickButton(secondaryJoystick, 10).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(-0.2)).andThen(() -> arm.setClawMotorOutput(0)));
+
+
+    new JoystickButton(secondaryJoystick, 7).onTrue(new InstantCommand(() -> arm.zeroClawPos()));
 
 
     
     
 
   }
+
+  public Drivetrain getDrivetrain(){
+    return drivetrain;
+  }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -153,17 +222,11 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-    // Command fullAuto = autoBuilder.fullAuto(pathGroup);
+    List<PathPlannerTrajectory> selectedPath = autoChooser.getSelected();
 
-    return new SequentialCommandGroup(
-      new SetArmState(arm, new ArmState()),
-      new SetArmState(arm, new ArmState(new Rotation2d(),new Rotation2d(Math.PI/4),new Rotation2d(),0)),
-      new SetArmState(arm, new ArmState(new Rotation2d(Math.PI/4),new Rotation2d(Math.PI/4),new Rotation2d(Math.PI/4),0)),
-      new SetArmState(arm, new ArmState(new Rotation2d(), new Rotation2d(Math.PI/4), new Rotation2d(), 0)),
-      new SetArmState(arm, new ArmState())
+    Command fullAuto = autoBuilder.fullAuto(selectedPath);
 
-
-    );
+    return fullAuto;
 
   }
 
