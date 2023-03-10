@@ -25,7 +25,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -78,12 +80,13 @@ public class Drivetrain extends SubsystemBase {
   public boolean allModuleHomeStatus = false;
 
 
-  public Drivetrain(/*PhotonCamera photonCamera*/) {
+  public Drivetrain(PhotonCamera photonCamera) {
     calibrateGyro();
 
-    // this.photonCamera = photonCamera;
+    this.photonCamera = photonCamera;
 
     setCurrentPose(new Pose2d(new Translation2d(1, 0), Rotation2d.fromDegrees(180)));
+
 
   }
 
@@ -100,27 +103,27 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Bot Heading", getChassisAngle().getDegrees());
     SmartDashboard.putNumber("Bot Pitch", getPitch().getDegrees());
 
-    // var pipelineResult = photonCamera.getLatestResult();
-    // var resultTimestamp = pipelineResult.getTimestampSeconds();
+    var pipelineResult = photonCamera.getLatestResult();
+    var resultTimestamp = pipelineResult.getTimestampSeconds();
 
-    // if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-    //   previousPipelineTimestamp = resultTimestamp;
-    //   var target = pipelineResult.getBestTarget();
+    if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
+      previousPipelineTimestamp = resultTimestamp;
+      var target = pipelineResult.getBestTarget();
 
-    //   if (target.getPoseAmbiguity() <= .05) {
-    //     Transform3d camToTarget = target.getBestCameraToTarget();
-    //     Transform3d targetToCamera = camToTarget.inverse();
+      if (target.getPoseAmbiguity() <= .05) {
+        Transform3d camToTarget = target.getBestCameraToTarget();
+        Transform3d targetToCamera = camToTarget.inverse();
 
-    //     Pose3d targetPose = getSelectedTargetPose(target.getFiducialId());
-    //     Pose3d camPose = targetPose.transformBy(targetToCamera);
+        Pose3d targetPose = getSelectedTargetPose(target.getFiducialId());
+        Pose3d camPose = targetPose.transformBy(targetToCamera);
 
-    //     Pose2d visionMeasurement = camPose.transformBy(PhotonConstants.CAMERA_TO_ROBOT).toPose2d();
-    //     poseEstimator.addVisionMeasurement(visionMeasurement, resultTimestamp);
-    //     SmartDashboard.putString("Vision Pose", visionMeasurement.toString());
+        Pose2d visionMeasurement = camPose.transformBy(PhotonConstants.CAMERA_TO_ROBOT).toPose2d();
+        poseEstimator.addVisionMeasurement(visionMeasurement, resultTimestamp);
+        SmartDashboard.putString("Vision Pose", visionMeasurement.toString());
 
 
-    //   }
-    // }
+      }
+    }
 
     
     poseEstimator.update(getChassisAngle(), getModulePositions());
@@ -147,9 +150,18 @@ public class Drivetrain extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean isFieldRelative){
 
+    Alliance alliance = DriverStation.getAlliance();
+
+    Rotation2d heading =  getRobotPose().getRotation();
+
+
+    if(alliance == Alliance.Red){
+      heading = getRobotPose().getRotation().plus(Rotation2d.fromDegrees(180));
+    } 
+
     //field relative or not, forward always away from drive station
     if(isFieldRelative){
-      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getRobotPose().getRotation());
+      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, heading);
     } else {
       chassisSpeeds = new ChassisSpeeds(xSpeed,ySpeed,rot);
     }
