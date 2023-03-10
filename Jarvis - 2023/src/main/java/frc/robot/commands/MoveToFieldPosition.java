@@ -6,12 +6,11 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
-import frc.robot.Constants;
+import frc.robot.Gains;
 import frc.robot.subsystems.Drivetrain;
 
 public class MoveToFieldPosition extends CommandBase {
@@ -19,10 +18,15 @@ public class MoveToFieldPosition extends CommandBase {
   Drivetrain drivetrain;
   Pose2d targetFieldPosition;
   ShuffleboardTab PIDTab;
+  GenericEntry xyP;
+  GenericEntry tP;
 
-  ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(3,2));
-  ProfiledPIDController yController = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(3,2));
-  ProfiledPIDController thetaController = new ProfiledPIDController(0.1, 0, 0.01, new TrapezoidProfile.Constraints(4,4));
+  Gains translationGains = new Gains(1, 0, 0, 0, 0, 1);
+  Gains rotationGains = new Gains(0.1, 0, 0, 0, 0, 0);
+
+  ProfiledPIDController xController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,2));
+  ProfiledPIDController yController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,2));
+  ProfiledPIDController thetaController = new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(4,4));
 
   public MoveToFieldPosition(Pose2d targetFieldPosition, Drivetrain drivetrain, ShuffleboardTab PIDTab) {
     this.drivetrain = drivetrain;
@@ -31,7 +35,8 @@ public class MoveToFieldPosition extends CommandBase {
 
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    PIDTab.
+    xyP = PIDTab.add("translation P",translationGains.P).getEntry();
+    tP = PIDTab.add("rotation P", rotationGains.P).getEntry();
   }
 
   // Called when the command is initially scheduled.
@@ -57,6 +62,8 @@ public class MoveToFieldPosition extends CommandBase {
 
     drivetrain.drive(xSpeed, ySpeed, thetaSpeed, true);
 
+    checkShuffleboard();
+
   }
 
   // Called once the command ends or is interrupted.
@@ -69,5 +76,22 @@ public class MoveToFieldPosition extends CommandBase {
   @Override
   public boolean isFinished() {
     return xController.atGoal() && yController.atGoal() && thetaController.atGoal();
+  }
+
+
+  private void checkShuffleboard(){
+
+    if(xyP.getDouble(translationGains.P) != xController.getP()){
+      xController.setP(xyP.getDouble(translationGains.P));
+      yController.setP(xyP.getDouble(translationGains.P));
+    }
+
+    if(tP.getDouble(rotationGains.P) != thetaController.getP()){
+      thetaController.setP(tP.getDouble(rotationGains.P));
+    }
+
+
+
+
   }
 }

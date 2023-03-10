@@ -13,8 +13,7 @@ public class PercentageControl extends CommandBase {
   private Arm arm;
   private Joystick joystick;
   private Joystick secondaryJoystick;
-  
-  private boolean clawState;
+
   /** Creates a new JoystickControl. */
   public PercentageControl(Drivetrain drivetrain, Arm arm, Joystick joystick, Joystick secondaryJoystick) {
     this.arm = arm;
