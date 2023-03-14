@@ -170,7 +170,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void setModuleStates(SwerveModuleState[] moduleStates){
     //desaturate wheel speeds to under max
-    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, ModuleConstants.FAST_MAX_SPEED);
+    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, ModuleConstants.MAX_SPEED);
 
     //assign states to the modules
     frontLeft.setDesiredState(moduleStates[0]);

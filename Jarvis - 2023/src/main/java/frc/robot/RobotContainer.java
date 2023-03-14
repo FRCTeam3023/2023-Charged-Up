@@ -21,8 +21,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,8 +28,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ScoringPositions;
 import frc.robot.commands.ArmControl;
-import frc.robot.commands.HoldState;
 import frc.robot.commands.HomeCommand;
 import frc.robot.commands.JoystickDrive;
 import frc.robot.commands.LevelChargeStation;
@@ -62,12 +60,9 @@ public class RobotContainer {
   
   private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, mainJoystick);
   private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, mainJoystick, secondaryJoystick);
-  private final HoldState holdState = new HoldState(arm);
   private final HomeCommand homeCommand = new HomeCommand(drivetrain);
-  private final LevelChargeStation levelChargeStation = new LevelChargeStation(drivetrain);
   private final ArmControl armControl = new ArmControl(arm, secondaryJoystick);
 
-  private final ShuffleboardTab PIDTab = Shuffleboard.getTab("PID Tuning");
 
 
   // This will load the file "Simple Path.path" and generate it with a max velocity of 2 m/s and a max acceleration of 1 m/s^2
@@ -170,12 +165,15 @@ public class RobotContainer {
 
     // new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
 
+    new JoystickButton(mainJoystick, 5).whileTrue(new MoveToFieldPosition(ScoringPositions.Red2, drivetrain));
+    new JoystickButton(mainJoystick, 6).whileTrue(new MoveToFieldPosition(ScoringPositions.RED_PICKUP_RIGHT, drivetrain));
+
 
     //zero Gyro angle, counter drift during testing. Hopefully get a better gyro soon  (Will make a loop overrun warning)
     new JoystickButton(mainJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
     new JoystickButton(mainJoystick, 12).onTrue(new InstantCommand(() -> arm.zeroEncoders()));
 
-    new JoystickButton(mainJoystick, 4).whileTrue(new MoveToFieldPosition(new Pose2d(14, 3, new Rotation2d(Math.PI)), drivetrain, PIDTab));
+    new JoystickButton(mainJoystick, 4).whileTrue(new MoveToFieldPosition(new Pose2d(14, 3, new Rotation2d()), drivetrain));
 
 
     /*------------------------------------------------------------------------------------------- */

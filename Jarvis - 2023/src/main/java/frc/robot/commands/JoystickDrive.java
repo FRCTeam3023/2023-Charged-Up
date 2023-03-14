@@ -15,6 +15,10 @@ public class JoystickDrive extends CommandBase {
   private final Drivetrain drivetrain;
   private final Joystick joystick;
 
+  private double xInput;
+  private double yInput;
+  private double rInput;
+
   private double xSpeed;
   private double ySpeed;
   private double rot;
@@ -39,26 +43,29 @@ public class JoystickDrive extends CommandBase {
   @Override
   public void execute() {
     //take joystick inputs scaled to the max speed of the bot
-    //desaturation will lead to never exeeding max on diagonals 
+
+    xInput = applyDeadband(-joystick.getX(), Constants.DRIVE_TOLERANCE_PERCENT);
+    yInput = applyDeadband(-joystick.getY(), Constants.DRIVE_TOLERANCE_PERCENT);
+    rInput = applyDeadband(-joystick.getTwist(), Constants.ROTATION_TOLERANCE_PERCENT);
+
 
     if(joystick.getRawButton(1)){
-      xSpeed = -joystick.getY() * ModuleConstants.FAST_MAX_SPEED;
-      ySpeed = -joystick.getX() * ModuleConstants.FAST_MAX_SPEED;
-      rot = -joystick.getTwist() * Constants.FAST_MAX_ANGULAR_SPEED;
+      xSpeed = yInput * ModuleConstants.SLOW_MAX_SPEED;
+      ySpeed = xInput * ModuleConstants.SLOW_MAX_SPEED;
+      rot = rInput * Constants.SLOW_MAX_ANGULAR_SPEED;
     }else{
-      xSpeed = -joystick.getY() * ModuleConstants.MAX_SPEED;
-      ySpeed = -joystick.getX() * ModuleConstants.MAX_SPEED;
-      rot = -joystick.getTwist() * Constants.MAX_ANGULAR_SPEED;
+      
+      xSpeed = yInput * ModuleConstants.MAX_SPEED;
+      ySpeed = xInput * ModuleConstants.MAX_SPEED;
+      rot = rInput * Constants.MAX_ANGULAR_SPEED;
+    }
+
+    if(joystick.getPOV() != -1){
+      xSpeed = Math.cos(joystick.getPOV() * (Math.PI/180)) * 0.2;
+      ySpeed = -Math.sin(joystick.getPOV() * (Math.PI/180)) * 0.2;
     }
     
-   
-
-    if(Math.abs(xSpeed) < .15) xSpeed = 0;
-    if(Math.abs(ySpeed) < .15) ySpeed = 0;
-    if(Math.abs(rot) < 0.75) rot = 0;
-
     drivetrain.drive(xSpeed, ySpeed, rot, true);
-
   }
 
   // Called once the command ends or is interrupted.
@@ -71,5 +78,13 @@ public class JoystickDrive extends CommandBase {
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+
+  private double applyDeadband(double joystickValue, double tolerance){
+    if(Math.abs(joystickValue) > tolerance){
+      return Math.signum(joystickValue) * (Math.abs(joystickValue) - tolerance)/(1-tolerance);
+    } 
+    return 0;
   }
 }

@@ -13,7 +13,7 @@ public class ArmControl extends CommandBase {
   /** Creates a new ArmControl. */
   Arm arm;
   Joystick joystick;
-  ArmState stateToHold;
+  ArmState stateToHold = new ArmState();
   public ArmControl(Arm arm, Joystick joystick) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.arm = arm;

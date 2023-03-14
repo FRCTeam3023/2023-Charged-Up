@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -22,9 +23,14 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
 
+    public static final double DRIVE_TOLERANCE_PERCENT = 0.15;
+    public static final double ROTATION_TOLERANCE_PERCENT = 0.15;
+
+    public static final double JOG_SPEED = 0.4;
+
     //Max radians/sec that the bot will rotate at
     public static final double MAX_ANGULAR_SPEED = 2;
-    public static final double FAST_MAX_ANGULAR_SPEED = 3;
+    public static final double SLOW_MAX_ANGULAR_SPEED = 3;
     //acceleration of rotation, rad/sec^2
     public static final double MAX_ANGULAR_ACCELERATION = 16;
 
@@ -45,8 +51,8 @@ public final class Constants {
         public static final double DRIVE_GEARING = 7; 
         public static final double WHEEL_DIA = 4; //in inches
         public static final double TURN_GEARING = 2.89 * 2.89 * 6;
-        public static final double MAX_SPEED = 2; 
-        public static final double FAST_MAX_SPEED = 5;
+        public static final double MAX_SPEED = 5;
+        public static final double SLOW_MAX_SPEED = 1.5; 
 
         //module offsets for the zero position for each wheel, in this order
         //Front Left - Front Right - Back Left - Back Right
@@ -124,6 +130,50 @@ public final class Constants {
         public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(39),Rotation2d.fromDegrees(105),Rotation2d.fromDegrees( 185),0);
         public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(0), 250);
 
+
+
+      }
+
+
+
+      public static class ScoringPositions {
+        public static final double SCORING_DEPTH_BLUE = 1.8;
+        public static final double SCORING_DEPTH_RED = 14.74;
+
+        public static final Pose2d BLUE1 = new Pose2d(SCORING_DEPTH_BLUE, 4.97, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE2 = new Pose2d(SCORING_DEPTH_BLUE, 4.42, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE3 = new Pose2d(SCORING_DEPTH_BLUE, 3.86, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE4 = new Pose2d(SCORING_DEPTH_BLUE, 3.31, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE5 = new Pose2d(SCORING_DEPTH_BLUE, 2.75, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE6 = new Pose2d(SCORING_DEPTH_BLUE, 2.19, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE7 = new Pose2d(SCORING_DEPTH_BLUE, 1.62, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE8 = new Pose2d(SCORING_DEPTH_BLUE, 1.07, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE9 = new Pose2d(SCORING_DEPTH_BLUE, 0.51, new Rotation2d(Math.PI));
+
+        public static final Pose2d Red1 = new Pose2d(SCORING_DEPTH_RED, 0.51, new Rotation2d());
+        public static final Pose2d Red2 = new Pose2d(SCORING_DEPTH_RED, 1.07, new Rotation2d());
+        public static final Pose2d Red3 = new Pose2d(SCORING_DEPTH_RED, 1.62, new Rotation2d());
+        public static final Pose2d Red4 = new Pose2d(SCORING_DEPTH_RED, 2.19, new Rotation2d());
+        public static final Pose2d Red5 = new Pose2d(SCORING_DEPTH_RED, 2.75, new Rotation2d());
+        public static final Pose2d Red6 = new Pose2d(SCORING_DEPTH_RED, 3.31, new Rotation2d());
+        public static final Pose2d Red7 = new Pose2d(SCORING_DEPTH_RED, 3.86, new Rotation2d());
+        public static final Pose2d Red8 = new Pose2d(SCORING_DEPTH_RED, 4.42, new Rotation2d());
+        public static final Pose2d Red9 = new Pose2d(SCORING_DEPTH_RED, 4.97, new Rotation2d());
+
+
+
+        public static final double PICKUP_DEPTH_RED = 1;
+        public static final double PICKUP_DEPTH_BLUE = 15.6;
+
+
+        public static final Pose2d RED_PICKUP_RIGHT = new Pose2d(PICKUP_DEPTH_RED, 7.45, new Rotation2d(Math.PI));
+        public static final Pose2d RED_PICKUP_LEFT = new Pose2d(PICKUP_DEPTH_RED, 6.14, new Rotation2d(Math.PI));
+
+
+        public static final Pose2d BLUE_PICKUP_RIGHT = new Pose2d(PICKUP_DEPTH_BLUE, 6.14, new Rotation2d(Math.PI));
+        public static final Pose2d BLUE_PICKUP_LEFT = new Pose2d(PICKUP_DEPTH_BLUE, 7.4, new Rotation2d(Math.PI));
+
+        
 
 
       }

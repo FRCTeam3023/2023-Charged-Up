@@ -19,6 +19,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Gains;
 import frc.robot.Constants.ModuleConstants;
@@ -37,7 +39,7 @@ public class SwerveModule {
     private Gains turnGains = new Gains(.8,0,0,0,0,1);
 
 
-    private Gains driveGains = new Gains(0.05,0,0,0.08,0,1);
+    private Gains driveGains = new Gains(0 /*0.05*/,0,0,0.05,0,1);
 
     private boolean homeStatus = false;
     public boolean homeFinished = false;
@@ -133,6 +135,9 @@ public class SwerveModule {
      * @param desiredState the desired state
      */
     public void setDesiredState(SwerveModuleState desiredState){
+
+        SmartDashboard.putNumber("target", desiredState.speedMetersPerSecond);
+        SmartDashboard.putNumber("actual", getSpeed());
 
         //prevents returning back to 0 state when not moving
         if(Math.abs(desiredState.speedMetersPerSecond) < .001){
