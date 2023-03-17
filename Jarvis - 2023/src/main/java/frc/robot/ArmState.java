@@ -48,5 +48,16 @@ public class ArmState {
         // }
     }
 
+    public void setPostion(ArmState state){
+        this.baseJointPosition = state.baseJointPosition;
+        this.elbowJointPosition = state.elbowJointPosition;
+        this.wristJointPosition = state.wristJointPosition;
+        this.clawPos = state.clawPos;
+        clawClosed = state.clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD;
+        // if(clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD){
+        //     clawClosed = true;
+        // }
+    }
+
     
 }

@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ArmState;
 import frc.robot.subsystems.Arm;
@@ -13,25 +14,27 @@ public class ArmControl extends CommandBase {
   /** Creates a new ArmControl. */
   Arm arm;
   Joystick joystick;
-  ArmState stateToHold = new ArmState();
+  private static ArmState stateToHold = new ArmState();
   public ArmControl(Arm arm, Joystick joystick) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.arm = arm;
     this.joystick = joystick;
     addRequirements(arm);
+
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    stateToHold = arm.currentState;
+    stateToHold.setPostion(arm.currentState);
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if(Math.abs(joystick.getY()) > 0.25){
-      arm.setBaseMotorOutput(-joystick.getY()* 0.2);
+      arm.setBaseMotorOutput(-joystick.getY()* 0.1);
       stateToHold.baseJointPosition = arm.currentState.baseJointPosition;
     }else{
       arm.setBaseJointPosition(stateToHold.baseJointPosition);
@@ -44,6 +47,7 @@ public class ArmControl extends CommandBase {
     }else if(joystick.getPOV() == 180){
       arm.setElbowMotorOutput(-.15);
       stateToHold.elbowJointPosition = arm.currentState.elbowJointPosition;
+
     }else{
       arm.setElbowJointPosition(stateToHold.elbowJointPosition);
     }

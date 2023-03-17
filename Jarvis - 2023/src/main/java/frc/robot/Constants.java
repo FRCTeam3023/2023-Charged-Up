@@ -48,8 +48,8 @@ public final class Constants {
 
 
     public final class ModuleConstants {
-        public static final double DRIVE_GEARING = 7; 
-        public static final double WHEEL_DIA = 4; //in inches
+        public static final double DRIVE_GEARING = 8; 
+        public static final double WHEEL_DIA = 3.875; //in inches
         public static final double TURN_GEARING = 2.89 * 2.89 * 6;
         public static final double MAX_SPEED = 5;
         public static final double SLOW_MAX_SPEED = 1.5; 
@@ -84,7 +84,7 @@ public final class Constants {
 
         public final static Transform3d CAMERA_TO_ROBOT = 
             new Transform3d(
-                new Translation3d(0, -Units.inchesToMeters(7), -Units.inchesToMeters(11.75)), 
+                new Translation3d(0, Units.inchesToMeters(5.5), -Units.inchesToMeters(11.75)), 
                 new Rotation3d(Units.degreesToRadians(CAM_PITCH),0,0)
             );
 
@@ -129,6 +129,8 @@ public final class Constants {
         public static final ArmState HIGH_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(54),Rotation2d.fromDegrees(130),Rotation2d.fromDegrees(290),250);
         public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(39),Rotation2d.fromDegrees(105),Rotation2d.fromDegrees( 185),0);
         public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(0), 250);
+        
+        public static final double BASE_HOLDING_POWER = -0.06;
 
 
 

@@ -24,11 +24,11 @@ public class MoveToFieldPosition extends CommandBase {
   // private static GenericEntry xyP;
   // private static GenericEntry tP;
 
-  Gains translationGains = new Gains(3, 0, 0, 0, 0, 1);
-  Gains rotationGains = new Gains(5, 0, 0.1, 0, 0, 0);
+  Gains translationGains = new Gains(7, 0, 0, 0, 0, 1);
+  Gains rotationGains = new Gains(7, 0, 0.1, 0, 0, 0);
 
-  ProfiledPIDController xController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,3));
-  ProfiledPIDController yController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,3));
+  ProfiledPIDController xController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,2));
+  ProfiledPIDController yController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,2));
   ProfiledPIDController thetaController = new ProfiledPIDController(rotationGains.P, 0, 0, new TrapezoidProfile.Constraints(4,3));
 
 
@@ -55,8 +55,8 @@ public class MoveToFieldPosition extends CommandBase {
     yController.reset(drivetrain.getRobotPose().getY());
     thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians());
 
-    xController.setTolerance(0.1);
-    yController.setTolerance(0.1);
+    xController.setTolerance(0.05);
+    yController.setTolerance(0.05);
     thetaController.setTolerance(0.05);
     checkShuffleboard();
 
@@ -88,7 +88,8 @@ public class MoveToFieldPosition extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return xController.atGoal() && yController.atGoal() && thetaController.atGoal();
+    // return xController.atGoal() && yController.atGoal() && thetaController.atGoal();
+    return false;
   }
 
 

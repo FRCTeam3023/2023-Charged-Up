@@ -5,11 +5,14 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenixpro.hardware.CANcoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,6 +28,8 @@ public class Arm extends SubsystemBase {
   private TalonFX elbowMotor = new TalonFX(11);
   private TalonSRX wristMotor = new TalonSRX(13);
   private TalonSRX clawMotor = new TalonSRX(12);
+
+  private CANCoder wristEncoder = new CANCoder(20);
 
 
   public static double elbowSpeedLimit = 0.5;
@@ -124,6 +129,7 @@ public class Arm extends SubsystemBase {
     resetClawPos(0);
 
 
+
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
 
   }
@@ -134,6 +140,8 @@ public class Arm extends SubsystemBase {
     SmartDashboard.putNumber("Elbow Angle", getElbowJointPosition().getDegrees());
     SmartDashboard.putNumber("Wrist Angle", getWristJointPosition().getDegrees());
     SmartDashboard.putNumber("Claw Position", getClawPosition());
+
+    System.out.println("Encoder Pos: " + wristEncoder.getPosition());
 
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
 
@@ -172,6 +180,7 @@ public class Arm extends SubsystemBase {
    */
   public void setBaseMotorOutput(double percentOutput){
     baseMotor.set(ControlMode.PercentOutput, percentOutput);
+    System.out.println(percentOutput);
   }
 
   /**
@@ -180,7 +189,9 @@ public class Arm extends SubsystemBase {
    * @param angle target angle
    */
   public void setBaseJointPosition(Rotation2d angle){
-    baseMotor.set(ControlMode.Position, angle.getDegrees());
+    double FF = Math.sin(getBaseJointPosition().getRadians() * ArmConstants.BASE_HOLDING_POWER);
+
+    baseMotor.set(ControlMode.Position, angle.getDegrees(), DemandType.ArbitraryFeedForward, FF);
   }
 
   /**
