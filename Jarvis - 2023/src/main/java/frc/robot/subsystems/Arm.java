@@ -15,6 +15,8 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenixpro.hardware.CANcoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.ArmState;
@@ -43,6 +45,9 @@ public class Arm extends SubsystemBase {
   public Gains clawJointGains = new Gains(20, 0, 0, 0, 0, 0.5);
 
   public ArmState currentState = new ArmState();
+
+  private final ShuffleboardTab armTab = Shuffleboard.getTab("Arm");
+
 
 
 
@@ -76,10 +81,13 @@ public class Arm extends SubsystemBase {
     elbowMotor.set(ControlMode.PercentOutput, 0);
     elbowMotor.setInverted(false);
 
-    elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX, Constants.TIMEOUT_MS);
+    clawMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    clawMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * 360);
 
-    //returns degrees of motion instead of sensor units
-    elbowMotor.configSelectedFeedbackCoefficient( (1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.ELBOW_GEAR_RATIO) * 360);
+    // elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX, Constants.TIMEOUT_MS);
+
+    // //returns degrees of motion instead of sensor units
+    // elbowMotor.configSelectedFeedbackCoefficient( (1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.ELBOW_GEAR_RATIO) * 360);
 
 
     elbowMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.P);
@@ -99,8 +107,11 @@ public class Arm extends SubsystemBase {
     wristMotor.set(ControlMode.PercentOutput, 0);
     wristMotor.setInverted(false);
 
-    wristMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder );
-    wristMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * 360);
+    wristMotor.configRemoteFeedbackFilter(wristEncoder, 0);
+    wristMotor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+
+    // wristMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder );
+    // wristMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * 360);
 
     wristMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.P);
     wristMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.I);
@@ -136,7 +147,7 @@ public class Arm extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Arm Angle", getBaseJointPosition().getDegrees());
+    SmartDashboard.putNumber("Base Angle", getBaseJointPosition().getDegrees());
     SmartDashboard.putNumber("Elbow Angle", getElbowJointPosition().getDegrees());
     SmartDashboard.putNumber("Wrist Angle", getWristJointPosition().getDegrees());
     SmartDashboard.putNumber("Claw Position", getClawPosition());
@@ -144,6 +155,7 @@ public class Arm extends SubsystemBase {
     System.out.println("Encoder Pos: " + wristEncoder.getPosition());
 
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
+
 
   }
 
@@ -180,7 +192,6 @@ public class Arm extends SubsystemBase {
    */
   public void setBaseMotorOutput(double percentOutput){
     baseMotor.set(ControlMode.PercentOutput, percentOutput);
-    System.out.println(percentOutput);
   }
 
   /**
