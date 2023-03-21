@@ -31,7 +31,8 @@ public class Arm extends SubsystemBase {
   private TalonSRX wristMotor = new TalonSRX(13);
   private TalonSRX clawMotor = new TalonSRX(12);
 
-  private CANCoder wristEncoder = new CANCoder(20);
+  private CANCoder elbowEncoder = new CANCoder(13);
+  private CANCoder wristEncoder = new CANCoder(14);
 
 
   public static double elbowSpeedLimit = 0.5;
@@ -81,8 +82,9 @@ public class Arm extends SubsystemBase {
     elbowMotor.set(ControlMode.PercentOutput, 0);
     elbowMotor.setInverted(false);
 
-    clawMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-    clawMotor.configSelectedFeedbackCoefficient((1/Constants.QUAD_ENCODER_UNITS_PER_REV) * 360);
+    elbowMotor.configRemoteFeedbackFilter(elbowEncoder, 0);
+    elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+    elbowMotor.configSelectedFeedbackCoefficient(1/2048);
 
     // elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX, Constants.TIMEOUT_MS);
 
@@ -152,7 +154,7 @@ public class Arm extends SubsystemBase {
     SmartDashboard.putNumber("Wrist Angle", getWristJointPosition().getDegrees());
     SmartDashboard.putNumber("Claw Position", getClawPosition());
 
-    System.out.println("Encoder Pos: " + wristEncoder.getPosition());
+    System.out.println("Wrist: " + wristEncoder.getPosition() + " Elbow: " + elbowEncoder.getPosition());
 
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
 
