@@ -9,11 +9,14 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Gains;
+import frc.robot.Constants.ScoringPositions;
 import frc.robot.subsystems.Drivetrain;
 
 public class MoveToFieldPosition extends CommandBase {
@@ -27,8 +30,8 @@ public class MoveToFieldPosition extends CommandBase {
   Gains translationGains = new Gains(7, 0, 0, 0, 0, 1);
   Gains rotationGains = new Gains(7, 0, 0.1, 0, 0, 0);
 
-  ProfiledPIDController xController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,2));
-  ProfiledPIDController yController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,2));
+  ProfiledPIDController xController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,1.5));
+  ProfiledPIDController yController = new ProfiledPIDController(translationGains.P, 0, 0, new TrapezoidProfile.Constraints(3,1.5));
   ProfiledPIDController thetaController = new ProfiledPIDController(rotationGains.P, 0, 0, new TrapezoidProfile.Constraints(4,3));
 
 
@@ -37,20 +40,121 @@ public class MoveToFieldPosition extends CommandBase {
     this.targetFieldPosition = targetFieldPosition;
     addRequirements(drivetrain);
 
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+  }
 
-    SmartDashboard.putNumber("Translation P", translationGains.P);
-    SmartDashboard.putNumber("Rotation P", rotationGains.P);
+  public MoveToFieldPosition(int buttonID, Drivetrain drivetrain){
+    this.drivetrain = drivetrain;
+    addRequirements(drivetrain);
 
+    if(DriverStation.getAlliance() == Alliance.Blue){
+      switch (buttonID) {
+        case 1:
+          targetFieldPosition = ScoringPositions.BLUE1;
+          break;
 
-    // xyP = PIDTab.add("Translation P",translationGains.P).getEntry();
-    // tP = PIDTab.add("Rotation P", rotationGains.P).getEntry();
+        case 2:
+          targetFieldPosition = ScoringPositions.BLUE2;
+          break;
 
+        case 3:
+          targetFieldPosition = ScoringPositions.BLUE3;
+          break;
+
+        case 4:
+          targetFieldPosition = ScoringPositions.BLUE4;
+          break;
+
+        case 5:
+          targetFieldPosition = ScoringPositions.BLUE5;
+          break;
+
+        case 6:
+          targetFieldPosition = ScoringPositions.BLUE6;
+          break;
+
+        case 7:
+          targetFieldPosition = ScoringPositions.BLUE7;
+          break;
+
+        case 8:
+          targetFieldPosition = ScoringPositions.BLUE8;
+          break;
+
+        case 9:
+          targetFieldPosition = ScoringPositions.BLUE9;
+          break;
+
+        case 10:
+          targetFieldPosition = ScoringPositions.BLUE_PICKUP_LEFT;
+          break;
+
+        case 11:
+          targetFieldPosition = ScoringPositions.BLUE_PICKUP_RIGHT;
+          break;
+      
+        default:
+          targetFieldPosition = drivetrain.getRobotPose();
+          break;
+      }
+    }else{
+      switch (buttonID) {
+        case 1:
+          targetFieldPosition = ScoringPositions.Red1;
+          break;
+
+        case 2:
+          targetFieldPosition = ScoringPositions.Red2;
+          break;
+
+        case 3:
+          targetFieldPosition = ScoringPositions.Red3;
+          break;
+
+        case 4:
+          targetFieldPosition = ScoringPositions.Red4;
+          break;
+
+        case 5:
+          targetFieldPosition = ScoringPositions.Red5;
+          break;
+
+        case 6:
+          targetFieldPosition = ScoringPositions.Red6;
+          break;
+
+        case 7:
+          targetFieldPosition = ScoringPositions.Red7;
+          break;
+
+        case 8:
+          targetFieldPosition = ScoringPositions.Red8;
+          break;
+
+        case 9:
+          targetFieldPosition = ScoringPositions.Red9;
+          break;
+
+        case 10:
+          targetFieldPosition = ScoringPositions.RED_PICKUP_LEFT;
+          break;
+
+        case 11:
+          targetFieldPosition = ScoringPositions.RED_PICKUP_RIGHT;
+          break;
+      
+        default:
+          targetFieldPosition = drivetrain.getRobotPose();
+          break;
+      }
+    }
+    
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
     xController.reset(drivetrain.getRobotPose().getX());
     yController.reset(drivetrain.getRobotPose().getY());
     thetaController.reset(drivetrain.getRobotPose().getRotation().getRadians());
@@ -60,7 +164,8 @@ public class MoveToFieldPosition extends CommandBase {
     thetaController.setTolerance(0.05);
     checkShuffleboard();
 
-
+    SmartDashboard.putNumber("Translation P", translationGains.P);
+    SmartDashboard.putNumber("Rotation P", rotationGains.P);
 
   }
 

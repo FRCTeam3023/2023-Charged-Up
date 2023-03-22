@@ -55,13 +55,14 @@ public class RobotContainer {
   private final Drivetrain drivetrain = new Drivetrain(camera);
   private final Arm arm = new Arm();
 
-  private final Joystick mainJoystick = new Joystick(1);
-  private final Joystick secondaryJoystick = new Joystick(0);
+  private final Joystick rightJoystick = new Joystick(1);
+  private final Joystick leftJoystick = new Joystick(0);
+  private final Joystick launchpad = new Joystick(2);
   
-  private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, mainJoystick);
-  private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, mainJoystick, secondaryJoystick);
+  private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, rightJoystick);
+  private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, rightJoystick, leftJoystick);
   private final HomeCommand homeCommand = new HomeCommand(drivetrain);
-  private final ArmControl armControl = new ArmControl(arm, secondaryJoystick);
+  private final ArmControl armControl = new ArmControl(arm, leftJoystick);
 
 
 
@@ -129,7 +130,7 @@ public class RobotContainer {
 
     PathPlannerServer.startServer(5811);
     drivetrain.setDefaultCommand(joystickDrive);
-    arm.setDefaultCommand(armControl);
+    // arm.setDefaultCommand(armControl);
 
 
 
@@ -159,21 +160,20 @@ public class RobotContainer {
      */
 
 
-    new JoystickButton(mainJoystick, 2).whileTrue(percentageControl);
+    new JoystickButton(rightJoystick, 2).whileTrue(percentageControl);
 
-    new JoystickButton(mainJoystick, 3).whileTrue(homeCommand);
+    new JoystickButton(rightJoystick, 3).whileTrue(homeCommand);
 
     // new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
 
-    new JoystickButton(mainJoystick, 5).whileTrue(new MoveToFieldPosition(ScoringPositions.Red2, drivetrain));
-    new JoystickButton(mainJoystick, 6).whileTrue(new MoveToFieldPosition(ScoringPositions.RED_PICKUP_RIGHT, drivetrain));
+    new JoystickButton(rightJoystick, 5).whileTrue(new MoveToFieldPosition(ScoringPositions.Red2, drivetrain));
+    new JoystickButton(rightJoystick, 6).whileTrue(new MoveToFieldPosition(ScoringPositions.RED_PICKUP_RIGHT, drivetrain));
 
 
     //zero Gyro angle, counter drift during testing. Hopefully get a better gyro soon  (Will make a loop overrun warning)
-    new JoystickButton(mainJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
-    new JoystickButton(mainJoystick, 12).onTrue(new InstantCommand(() -> arm.zeroEncoders()));
+    new JoystickButton(rightJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
 
-    new JoystickButton(mainJoystick, 4).whileTrue(new MoveToFieldPosition(new Pose2d(14, 3, new Rotation2d()), drivetrain));
+    new JoystickButton(rightJoystick, 4).whileTrue(new MoveToFieldPosition(new Pose2d(14, 3, new Rotation2d()), drivetrain));
 
 
     /*------------------------------------------------------------------------------------------- */
@@ -184,36 +184,51 @@ public class RobotContainer {
 
 
 
-    new JoystickButton(secondaryJoystick, 3).whileTrue(new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
+    new JoystickButton(leftJoystick, 3).whileTrue(new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
 
-    new JoystickButton(secondaryJoystick, 5).whileTrue(
+    new JoystickButton(leftJoystick, 5).whileTrue(
       new SequentialCommandGroup(
         new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
         new SetArmState(arm, ArmConstants.PICKUP_STATE))
     );
 
-    new JoystickButton(secondaryJoystick, 4).whileTrue(
+    new JoystickButton(leftJoystick, 4).whileTrue(
       new SequentialCommandGroup(
         new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
         new SetArmState(arm, ArmConstants.MID_SCORE_STATE))
     );
 
-    new JoystickButton(secondaryJoystick, 6).whileTrue( 
+    new JoystickButton(leftJoystick, 6).whileTrue( 
       new SequentialCommandGroup(
         new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
         new SetArmState(arm, ArmConstants.HIGH_SCORE_STATE)) 
     );
 
 
-    new JoystickButton(secondaryJoystick, 8).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(0.2)).andThen(() -> arm.setClawMotorOutput(0)));
-    new JoystickButton(secondaryJoystick, 10).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(-0.2)).andThen(() -> arm.setClawMotorOutput(0)));
+    new JoystickButton(leftJoystick, 8).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(0.2)).andThen(() -> arm.setClawMotorOutput(0)));
+    new JoystickButton(leftJoystick, 10).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(-0.2)).andThen(() -> arm.setClawMotorOutput(0)));
 
 
-    new JoystickButton(secondaryJoystick, 7).onTrue(new InstantCommand(() -> arm.zeroClawPos()));
+    new JoystickButton(leftJoystick, 7).onTrue(new InstantCommand(() -> arm.zeroClawPos()));
 
 
     
-    
+    //-------------------------------------------------------------------------------------------------------------
+
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_1).whileTrue(new MoveToFieldPosition(1, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_2).whileTrue(new MoveToFieldPosition(2, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_3).whileTrue(new MoveToFieldPosition(3, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_4).whileTrue(new MoveToFieldPosition(4, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_5).whileTrue(new MoveToFieldPosition(5, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_6).whileTrue(new MoveToFieldPosition(6, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_7).whileTrue(new MoveToFieldPosition(7, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_8).whileTrue(new MoveToFieldPosition(8, drivetrain));
+    new JoystickButton(launchpad, ScoringPositions.SCORING_BUTTON_9).whileTrue(new MoveToFieldPosition(9, drivetrain));
+
+    new JoystickButton(rightJoystick, 11).whileTrue(new MoveToFieldPosition(10, drivetrain));
+    new JoystickButton(rightJoystick, 12).whileTrue(new MoveToFieldPosition(11, drivetrain));
+
+
 
   }
 

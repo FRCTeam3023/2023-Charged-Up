@@ -15,6 +15,7 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenixpro.hardware.CANcoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,6 +47,8 @@ public class Arm extends SubsystemBase {
   public Gains clawJointGains = new Gains(20, 0, 0, 0, 0, 0.5);
 
   public ArmState currentState = new ArmState();
+
+  private final DigitalInput clawLimitSwitch = new DigitalInput(5);
 
   private final ShuffleboardTab armTab = Shuffleboard.getTab("Arm");
 
@@ -303,4 +306,9 @@ public class Arm extends SubsystemBase {
   public void resetClawPos(double position){
     clawMotor.setSelectedSensorPosition(position);
   }
+
+  public boolean getLimitSwitch(){
+    return clawLimitSwitch.get();
+  }
+
 }

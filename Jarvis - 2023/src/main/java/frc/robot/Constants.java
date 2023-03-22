@@ -51,7 +51,7 @@ public final class Constants {
         public static final double DRIVE_GEARING = 8; 
         public static final double WHEEL_DIA = 3.875; //in inches
         public static final double TURN_GEARING = 2.89 * 2.89 * 6;
-        public static final double MAX_SPEED = 5;
+        public static final double MAX_SPEED = 3.5;
         public static final double SLOW_MAX_SPEED = 1.5; 
 
         //module offsets for the zero position for each wheel, in this order
@@ -176,6 +176,18 @@ public final class Constants {
         public static final Pose2d BLUE_PICKUP_LEFT = new Pose2d(PICKUP_DEPTH_BLUE, 7.4, new Rotation2d(Math.PI));
 
         
+
+
+        public static final int SCORING_BUTTON_1 = 8;
+        public static final int SCORING_BUTTON_2 = 9;
+        public static final int SCORING_BUTTON_3 = 10;
+        public static final int SCORING_BUTTON_4 = 11;
+        public static final int SCORING_BUTTON_5 = 5;
+        public static final int SCORING_BUTTON_6 = 4;
+        public static final int SCORING_BUTTON_7 = 3;
+        public static final int SCORING_BUTTON_8 = 2;
+        public static final int SCORING_BUTTON_9 = 1;
+
 
 
       }
