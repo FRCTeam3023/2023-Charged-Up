@@ -21,7 +21,7 @@ public class SetClawState extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    System.out.println("starting claw state: " + clawClosed );
+    // System.out.println("starting claw state: " + clawClosed );
   }
 
   // Called every time the scheduler runs while the command is scheduled.

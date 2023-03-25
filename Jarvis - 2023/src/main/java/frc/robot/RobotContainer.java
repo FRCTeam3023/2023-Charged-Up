@@ -16,8 +16,6 @@ import com.pathplanner.lib.server.PathPlannerServer;
 
 import org.photonvision.PhotonCamera;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -34,7 +32,7 @@ import frc.robot.commands.HomeCommand;
 import frc.robot.commands.JoystickDrive;
 import frc.robot.commands.LevelChargeStation;
 import frc.robot.commands.MoveToFieldPosition;
-import frc.robot.commands.PercentageControl;
+import frc.robot.commands.ResetClawPosition;
 import frc.robot.commands.SetArmState;
 import frc.robot.commands.SetClawState;
 import frc.robot.subsystems.Arm;
@@ -60,9 +58,9 @@ public class RobotContainer {
   private final Joystick launchpad = new Joystick(2);
   
   private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, rightJoystick);
-  private final PercentageControl percentageControl = new PercentageControl(drivetrain, arm, rightJoystick, leftJoystick);
   private final HomeCommand homeCommand = new HomeCommand(drivetrain);
   private final ArmControl armControl = new ArmControl(arm, leftJoystick);
+
 
 
 
@@ -116,7 +114,6 @@ public class RobotContainer {
 
     eventMap.put("Home Modules", new HomeCommand(drivetrain));
     eventMap.put("Neutral State", new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
-    eventMap.put("Low State", new SetArmState(arm, ArmConstants.LOW_SCORE_STATE));
     eventMap.put("Mid State", new SetArmState(arm, ArmConstants.MID_SCORE_STATE));
     eventMap.put("High State", new SequentialCommandGroup(
       new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
@@ -130,7 +127,7 @@ public class RobotContainer {
 
     PathPlannerServer.startServer(5811);
     drivetrain.setDefaultCommand(joystickDrive);
-    // arm.setDefaultCommand(armControl);
+    arm.setDefaultCommand(armControl);
 
 
 
@@ -160,20 +157,17 @@ public class RobotContainer {
      */
 
 
-    new JoystickButton(rightJoystick, 2).whileTrue(percentageControl);
+    // new JoystickButton(rightJoystick, 2).whileTrue(percentageControl);
 
     new JoystickButton(rightJoystick, 3).whileTrue(homeCommand);
 
-    // new JoystickButton(mainJoystick, 4).onTrue(new InstantCommand(() -> drivetrain.zeroEncoders()).andThen(() -> drivetrain.stopModules()));
-
-    new JoystickButton(rightJoystick, 5).whileTrue(new MoveToFieldPosition(ScoringPositions.Red2, drivetrain));
-    new JoystickButton(rightJoystick, 6).whileTrue(new MoveToFieldPosition(ScoringPositions.RED_PICKUP_RIGHT, drivetrain));
+    new JoystickButton(rightJoystick, 4).onTrue(new InstantCommand(() -> arm.toggleCloseType()));
 
 
     //zero Gyro angle, counter drift during testing. Hopefully get a better gyro soon  (Will make a loop overrun warning)
     new JoystickButton(rightJoystick, 7).onTrue(new InstantCommand(() -> drivetrain.calibrateGyro()));
 
-    new JoystickButton(rightJoystick, 4).whileTrue(new MoveToFieldPosition(new Pose2d(14, 3, new Rotation2d()), drivetrain));
+    new JoystickButton(rightJoystick, 5).whileTrue(new ResetClawPosition(arm));
 
 
     /*------------------------------------------------------------------------------------------- */
@@ -194,7 +188,7 @@ public class RobotContainer {
 
     new JoystickButton(leftJoystick, 4).whileTrue(
       new SequentialCommandGroup(
-        new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
+        new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
         new SetArmState(arm, ArmConstants.MID_SCORE_STATE))
     );
 
@@ -204,12 +198,13 @@ public class RobotContainer {
         new SetArmState(arm, ArmConstants.HIGH_SCORE_STATE)) 
     );
 
+    new JoystickButton(leftJoystick, 7).whileTrue(
+      new SetArmState(arm, ArmConstants.HOME_STATE)
+    );
 
-    new JoystickButton(leftJoystick, 8).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(0.2)).andThen(() -> arm.setClawMotorOutput(0)));
-    new JoystickButton(leftJoystick, 10).whileTrue(new InstantCommand(()->arm.setClawMotorOutput(-0.2)).andThen(() -> arm.setClawMotorOutput(0)));
 
 
-    new JoystickButton(leftJoystick, 7).onTrue(new InstantCommand(() -> arm.zeroClawPos()));
+
 
 
     

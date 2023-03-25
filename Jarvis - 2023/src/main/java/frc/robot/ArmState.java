@@ -27,15 +27,25 @@ public class ArmState {
         clawClosed = false;
     }
 
-    public ArmState(Rotation2d baseJointPosition,Rotation2d elbowJointPos,Rotation2d wristJointPos, double clawPos){
+    // public ArmState(Rotation2d baseJointPosition,Rotation2d elbowJointPos,Rotation2d wristJointPos, double clawPos){
+    //     this.baseJointPosition = baseJointPosition;
+    //     this.elbowJointPosition = elbowJointPos;
+    //     this.wristJointPosition = wristJointPos;
+    //     this.clawPos = clawPos;
+    //     if(clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD){
+    //         clawClosed = true;
+    //     }
+    // }
+
+    public ArmState(Rotation2d baseJointPosition,Rotation2d elbowJointPos,Rotation2d wristJointPos, boolean clawClosed){
         this.baseJointPosition = baseJointPosition;
         this.elbowJointPosition = elbowJointPos;
         this.wristJointPosition = wristJointPos;
-        this.clawPos = clawPos;
         if(clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD){
             clawClosed = true;
         }
     }
+
 
     public void setPostion(Rotation2d baseJointPosition,Rotation2d elbowJointPos,Rotation2d wristJointPos, double clawPos){
         this.baseJointPosition = baseJointPosition;

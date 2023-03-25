@@ -43,7 +43,7 @@ public class SetArmState extends CommandBase {
     if(
     Math.abs(arm.getBaseJointPosition().minus(targetState.baseJointPosition).getDegrees()) < 5 &&
     Math.abs(arm.getElbowJointPosition().minus(targetState.elbowJointPosition).getDegrees()) < 5 &&
-    Math.abs(arm.getWristJointPosition().minus(targetState.wristJointPosition).getDegrees()) < 5
+    Math.abs(arm.getWristJointPosition().minus(targetState.wristJointPosition).getDegrees()) < 10
     ){
       return true;
     }

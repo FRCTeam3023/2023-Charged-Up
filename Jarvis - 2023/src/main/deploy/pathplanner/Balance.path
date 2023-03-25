@@ -18,8 +18,7 @@
       "stopEvent": {
         "names": [
           "Home Modules",
-          "Clearance State",
-          "Set Claw Cone"
+          "Clearance State"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",

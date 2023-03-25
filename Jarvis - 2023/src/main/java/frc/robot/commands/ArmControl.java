@@ -5,15 +5,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ArmState;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.subsystems.Arm;
 
 public class ArmControl extends CommandBase {
   /** Creates a new ArmControl. */
   Arm arm;
   Joystick joystick;
+
+  boolean limitSwitch = false;
+  boolean lastLimitSwitch = false;
   private static ArmState stateToHold = new ArmState();
   public ArmControl(Arm arm, Joystick joystick) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -42,10 +45,10 @@ public class ArmControl extends CommandBase {
 
 
     if(joystick.getPOV() == 0){
-      arm.setElbowMotorOutput(0.15);
+      arm.setElbowMotorOutput(0.25);
       stateToHold.elbowJointPosition = arm.currentState.elbowJointPosition;
     }else if(joystick.getPOV() == 180){
-      arm.setElbowMotorOutput(-.15);
+      arm.setElbowMotorOutput(-.08);
       stateToHold.elbowJointPosition = arm.currentState.elbowJointPosition;
 
     }else{
@@ -53,10 +56,10 @@ public class ArmControl extends CommandBase {
     }
 
     if(joystick.getRawButton(9)){
-      arm.setWristMotorOutput(0.15);
+      arm.setWristMotorOutput(0.2);
       stateToHold.wristJointPosition = arm.currentState.wristJointPosition;
     }else if(joystick.getRawButton(11)){
-      arm.setWristMotorOutput(-.15);
+      arm.setWristMotorOutput(-.2);
       stateToHold.wristJointPosition = arm.currentState.wristJointPosition;
     }else{
       arm.setWristJointPosition(stateToHold.wristJointPosition);
@@ -64,11 +67,32 @@ public class ArmControl extends CommandBase {
 
     if(joystick.getRawButton(1)){
       arm.setClawState(true);
-    }
-    if(joystick.getRawButton(2)){
+      stateToHold.clawClosed = arm.currentState.clawClosed;
+    }else if(joystick.getRawButton(2)){
       arm.setClawState(false);
+      stateToHold.clawClosed = arm.currentState.clawClosed;
+    }else if(joystick.getRawButton(10)){
+      arm.setClawMotorOutput(-0.2);
+      stateToHold.clawClosed = arm.currentState.clawClosed;
+    }else if(joystick.getRawButton(12)){
+      arm.setClawMotorOutput(ArmConstants.CLAW_CLOSING_OUTPUT);
+      stateToHold.clawClosed = arm.currentState.clawClosed;
+    }else{
+      // arm.setClawPosition(arm.getClawPosition());
+      arm.setClawState(arm.currentState.clawClosed);
     }
 
+    if(joystick.getRawButton(8)){
+      arm.resetClawPos(0);
+    }
+
+
+    limitSwitch = arm.getClawLimitSwitch();
+    if(limitSwitch != lastLimitSwitch && limitSwitch){
+      arm.resetClawPos(0);
+    }
+
+    lastLimitSwitch = arm.getClawLimitSwitch();
 
   }
 

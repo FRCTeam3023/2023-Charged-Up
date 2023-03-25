@@ -18,8 +18,7 @@
       "stopEvent": {
         "names": [
           "Home Modules",
-          "High State",
-          "Set Claw Cube"
+          "High State"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",

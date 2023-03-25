@@ -23,6 +23,8 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
 
+    public static final boolean testCode = true;
+
     public static final double DRIVE_TOLERANCE_PERCENT = 0.15;
     public static final double ROTATION_TOLERANCE_PERCENT = 0.15;
 
@@ -38,6 +40,7 @@ public final class Constants {
 
     public static final double FALCON_UNITS_PER_REV = 2048;
     public static final double QUAD_ENCODER_UNITS_PER_REV = 4096;
+    public static final double CANCODER_UNITS_PER_REV = 4096;
 
     
     
@@ -45,6 +48,7 @@ public final class Constants {
     public static final int PRIMARY_PID_LOOP_IDX = 0;
 
     public static final int TIMEOUT_MS = 30;
+
 
 
     public final class ModuleConstants {
@@ -114,24 +118,40 @@ public final class Constants {
         public static final double CLAW_GEAR_RATIO = 100;
         public static final double CLAW_PULLEY_RATIO = 1;
 
-        public static final double CLAW_CLOSING_OUTPUT = 0.2;
+        public static final double CLAW_CLOSING_OUTPUT = 0.3;
         public static final double CLAW_CLOSE_THRESHOLD = 20;
         public static final double CLAW_CLOSE_LIMIT = 300;
-        public static final double CUBE_CLAW_OFFSET = 220;
-        public static final double CONE_CLAW_OFFSET = 260;
+        public static final double CUBE_CLAW_OFFSET = 100;
+        public static final double CONE_CLAW_OFFSET = 250;
 
 
-        public static final ArmState NEUTRAL_STATE = new ArmState(Rotation2d.fromDegrees(15), Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0), 250);
-        public static final ArmState PRE_LOW_SCORE_STATE = new ArmState(new Rotation2d(), Rotation2d.fromDegrees(22), Rotation2d.fromDegrees(40), 250);
-        public static final ArmState LOW_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(37), Rotation2d.fromDegrees(22), Rotation2d.fromDegrees(40), 250);
-        public static final ArmState PRE_MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(150), 250);
-        public static final ArmState MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(200), 250);
-        public static final ArmState HIGH_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(54),Rotation2d.fromDegrees(130),Rotation2d.fromDegrees(290),250);
-        public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(39),Rotation2d.fromDegrees(105),Rotation2d.fromDegrees( 185),0);
-        public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(0), 250);
+        public static final ArmState HOME_STATE = new ArmState(Rotation2d.fromDegrees(-22), new Rotation2d(), Rotation2d.fromDegrees(80), true);
+        public static final ArmState NEUTRAL_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(75), true);
+        public static final ArmState PRE_MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(-20), Rotation2d.fromDegrees(93), Rotation2d.fromDegrees(80), true);
+        public static final ArmState MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(93), Rotation2d.fromDegrees(20), true);
+        public static final ArmState HIGH_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(54),Rotation2d.fromDegrees(130),Rotation2d.fromDegrees(290),true);
+        public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(39),Rotation2d.fromDegrees(105),Rotation2d.fromDegrees( 185), false);
+        public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(70), true);
         
         public static final double BASE_HOLDING_POWER = -0.06;
 
+
+        public static final double PULLEY_DIA = 0.5; //in
+        public static final double PULLEY_CIRCUMFERENCE = PULLEY_DIA * Math.PI;
+
+        public static final double WRIST_PULLEY_DIA = 0.625; //in
+        public static final double WRIST_PULLEY_CIRCUMFERENCE = WRIST_PULLEY_DIA * Math.PI;
+
+        public static final double CLAW_CABLE_LENGTH_OPEN_TO_CLOSE = 1.375;
+
+        public static final double BASE_JOINT_OFFSET = 20;
+
+        public static final double WRIST_MAGNET_OFFSET = 207;
+        public static final double ELBOW_MAGNET_OFFSET = 180;
+
+        public static final double HUMOROUS_LENGTH = 37;
+        public static final double FOREARM_LENGTH = 37;
+        public static final double CLAW_LENGTH = 6;
 
 
       }
