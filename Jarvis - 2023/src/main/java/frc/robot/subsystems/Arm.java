@@ -43,7 +43,7 @@ public class Arm extends SubsystemBase {
 
   public Gains elbowJointGains = new Gains(25, 0, 10, 0, 0, 0.30);
 
-  public Gains wristJointGains = new Gains(10, 0, 0, 0, 0, 0.5);
+  public Gains wristJointGains = new Gains(5, 0, 0, 0, 0, 0.5);
   public Gains clawJointGains = new Gains(10, 0, 0, 0, 0, 0.5);
 
   public ArmState currentState = new ArmState();
@@ -54,7 +54,7 @@ public class Arm extends SubsystemBase {
   private static double wristJointOffset; 
   private static double elbowJointOffset;
 
-  public static boolean isCube = false;
+  public static boolean isCube = true;
 
   public static double cableLengthOffset = 0;
 
@@ -135,7 +135,7 @@ public class Arm extends SubsystemBase {
     wristMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.F);
 
     wristMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, wristJointGains.PeakOutput);
-    wristMotor.configClosedloopRamp(0.5);
+    wristMotor.configClosedloopRamp(1);
 
     //------------------------------------------------------------------
 
@@ -162,6 +162,7 @@ public class Arm extends SubsystemBase {
     // elbowMotor.setSelectedSensorPosition(elbowEncoder.getAbsolutePosition());
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
 
+
   }
 
   @Override
@@ -172,15 +173,19 @@ public class Arm extends SubsystemBase {
     SmartDashboard.putNumber("Claw Position", getClawPosition());
     SmartDashboard.putBoolean("Claw Limit", getClawLimitSwitch());
 
-    SmartDashboard.putNumber("Elbow Absolute", elbowEncoder.getAbsolutePosition());
-    SmartDashboard.putNumber("Wrist Absolute", wristEncoder.getAbsolutePosition());
-    SmartDashboard.putNumber("Claw Offset", getClawCableLengthOffset());
+    // SmartDashboard.putNumber("Elbow Absolute", elbowEncoder.getAbsolutePosition());
+    // SmartDashboard.putNumber("Wrist Absolute", wristEncoder.getAbsolutePosition());
+    SmartDashboard.putNumber("Claw Offset", getRelativeCableOffset());
+
+    SmartDashboard.putString("Arm End", getArmEndPosition().toString());
+
+    SmartDashboard.putBoolean("isCube", isCube);
 
 
 
     currentState.setPostion(getBaseJointPosition(), getElbowJointPosition(), getWristJointPosition(), getClawPosition());
 
-
+    // isCube = SmartDashboard.getBoolean("isCube", isCube);
     
 
   }
@@ -199,6 +204,7 @@ public class Arm extends SubsystemBase {
   }
 
   public void setClawState(boolean isClosed){
+    System.out.println(isClosed);
     if(isClosed){
       if(!Constants.testCode){
         setClawMotorOutput(ArmConstants.CLAW_CLOSING_OUTPUT);
@@ -338,7 +344,7 @@ public class Arm extends SubsystemBase {
 
   public double getClawCableLengthOffset(){
     double lengthOffset =  -1*(getBaseJointPosition().getDegrees()/360 * ArmConstants.PULLEY_CIRCUMFERENCE) 
-    + (getElbowJointPosition().getDegrees()/360 * ArmConstants.PULLEY_CIRCUMFERENCE)
+    - (getElbowJointPosition().getDegrees()/360 * ArmConstants.PULLEY_CIRCUMFERENCE)
     - (getWristJointPosition().getDegrees()/360 * ArmConstants.WRIST_PULLEY_CIRCUMFERENCE);
 
     return lengthOffset/ArmConstants.CLAW_CABLE_LENGTH_OPEN_TO_CLOSE * ArmConstants.CLAW_CLOSE_LIMIT;

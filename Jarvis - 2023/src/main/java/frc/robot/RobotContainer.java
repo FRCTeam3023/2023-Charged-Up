@@ -7,6 +7,8 @@ package frc.robot;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.GroupLayout.Alignment;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -16,9 +18,11 @@ import com.pathplanner.lib.server.PathPlannerServer;
 
 import org.photonvision.PhotonCamera;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -61,18 +65,32 @@ public class RobotContainer {
   private final HomeCommand homeCommand = new HomeCommand(drivetrain);
   private final ArmControl armControl = new ArmControl(arm, leftJoystick);
 
+  
+
 
 
 
   // This will load the file "Simple Path.path" and generate it with a max velocity of 2 m/s and a max acceleration of 1 m/s^2
   // for every path in the group
   List<PathPlannerTrajectory> overLineInnerPath = PathPlanner.loadPathGroup("Over Line - Inner", new PathConstraints(3, 1.5));
+
   List<PathPlannerTrajectory> overLineOuterPath = PathPlanner.loadPathGroup("Over Line - Outer", new PathConstraints(3, 1.5));
   List<PathPlannerTrajectory> balacePath = PathPlanner.loadPathGroup("Balance", new PathConstraints(3, 1.5));
   List<PathPlannerTrajectory> cubeBalance = PathPlanner.loadPathGroup("1 Cube - Balance", new PathConstraints(3, 1.5));
   List<PathPlannerTrajectory> cubeOuter = PathPlanner.loadPathGroup("1 Cube - Outer", new PathConstraints(3, 1.5));
   List<PathPlannerTrajectory> cubeInner = PathPlanner.loadPathGroup("1 Cube - Inner", new PathConstraints(3, 1.5));
-  
+
+  List<PathPlannerTrajectory> overLineInnerRed = PathPlanner.loadPathGroup("Across Line - Inner Red", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> overLineOuterRed = PathPlanner.loadPathGroup("Across Line - Outer Red", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> BalanceRed = PathPlanner.loadPathGroup("Balance Red", new PathConstraints(3, 1.5));
+
+  List<PathPlannerTrajectory> cubeBalanceRed = PathPlanner.loadPathGroup("1 Cube - Balance Red", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> cubeInnerRed = PathPlanner.loadPathGroup("1 Cube - Inner Red", new PathConstraints(3, 1.5));
+  List<PathPlannerTrajectory> cubeOuterRed = PathPlanner.loadPathGroup("1 Cube - Outer Red", new PathConstraints(3, 1.5));
+
+
+
+
 
 
 
@@ -104,25 +122,42 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Over Line - Inner", overLineInnerPath);
     autoChooser.addOption("Over Line - Outer", overLineInnerPath);
     autoChooser.addOption("Balance", balacePath);
-    autoChooser.addOption("1 Cube - Balance", cubeBalance);
-    autoChooser.addOption("1 Cube - Inner", cubeInner);
-    autoChooser.addOption("1 Cube - Outer", cubeOuter);
+
+    autoChooser.addOption("Cube - Balance", cubeBalance);
+    autoChooser.addOption("Cube - Inner", cubeInner);
+    autoChooser.addOption("Cube - Outer", cubeOuter);
+
+    autoChooser.addOption("Over Line - Outer Red", overLineOuterRed);
+    autoChooser.addOption("Over Line - Inner Red", overLineInnerRed);
+    autoChooser.addOption("Balance Red", BalanceRed);
+
+    autoChooser.addOption("Cube - Balance Red", cubeBalanceRed);
+    autoChooser.addOption("Cube - Inner Red", cubeInnerRed);
+    autoChooser.addOption("Cube - Outer Red", cubeOuterRed);
+
+
+    
+
     
 
 
     SmartDashboard.putData(autoChooser);
 
     eventMap.put("Home Modules", new HomeCommand(drivetrain));
-    eventMap.put("Neutral State", new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
-    eventMap.put("Mid State", new SetArmState(arm, ArmConstants.MID_SCORE_STATE));
+    // eventMap.put("Neutral State", new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
+    eventMap.put("Mid State", new SequentialCommandGroup(
+      new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
+      new SetArmState(arm, ArmConstants.MID_SCORE_STATE)));
     eventMap.put("High State", new SequentialCommandGroup(
       new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
-      new SetArmState(arm, ArmConstants.HIGH_SCORE_STATE)) );
+      new SetArmState(arm, ArmConstants.HIGH_SCORE_STATE)));
+    eventMap.put("Home State", new SetArmState(arm, ArmConstants.HOME_STATE));
     eventMap.put("Clearance State", new SetArmState(arm, ArmConstants.CLEARANCE_STATE));
     eventMap.put("Charge Station Balance", new LevelChargeStation(drivetrain));
     eventMap.put("Open Claw", new SetClawState(arm, false));
     eventMap.put("Set Claw Cube", new InstantCommand(() -> arm.resetClawPos(ArmConstants.CUBE_CLAW_OFFSET)));
     eventMap.put("Set Claw Cone", new InstantCommand(() -> arm.resetClawPos(ArmConstants.CONE_CLAW_OFFSET)));
+    eventMap.put("Reset Claw", new ResetClawPosition(arm));
 
 
     PathPlannerServer.startServer(5811);
@@ -178,7 +213,7 @@ public class RobotContainer {
 
 
 
-    new JoystickButton(leftJoystick, 3).whileTrue(new SetArmState(arm, ArmConstants.NEUTRAL_STATE));
+    new JoystickButton(leftJoystick, 3).whileTrue(new SetArmState(arm, ArmConstants.HOME_STATE));
 
     new JoystickButton(leftJoystick, 5).whileTrue(
       new SequentialCommandGroup(
@@ -188,7 +223,7 @@ public class RobotContainer {
 
     new JoystickButton(leftJoystick, 4).whileTrue(
       new SequentialCommandGroup(
-        new SetArmState(arm, ArmConstants.PRE_MID_SCORE_STATE),
+        new SetArmState(arm, ArmConstants.CLEARANCE_STATE),
         new SetArmState(arm, ArmConstants.MID_SCORE_STATE))
     );
 
@@ -241,7 +276,9 @@ public class RobotContainer {
 
     List<PathPlannerTrajectory> selectedPath = autoChooser.getSelected();
 
+
     Command fullAuto = autoBuilder.fullAuto(selectedPath);
+
 
     return fullAuto;
 

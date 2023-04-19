@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import org.photonvision.PhotonCamera;
 
+import com.pathplanner.lib.PathPlanner;
+
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -35,6 +37,8 @@ public class Drivetrain extends SubsystemBase {
   private double previousPipelineTimestamp = 0;
   
   ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0,0,0);
+
+  // public static boolean aprilTagOn
 
   // private final ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
@@ -108,6 +112,9 @@ public class Drivetrain extends SubsystemBase {
         Pose3d camPose = targetPose.transformBy(targetToCamera);
 
         Pose2d visionMeasurement = camPose.transformBy(PhotonConstants.CAMERA_TO_ROBOT).toPose2d();
+
+        
+
         poseEstimator.addVisionMeasurement(visionMeasurement, resultTimestamp);
         SmartDashboard.putString("Vision Pose", visionMeasurement.toString());
 

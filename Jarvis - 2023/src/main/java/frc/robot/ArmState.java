@@ -41,9 +41,7 @@ public class ArmState {
         this.baseJointPosition = baseJointPosition;
         this.elbowJointPosition = elbowJointPos;
         this.wristJointPosition = wristJointPos;
-        if(clawPos > ArmConstants.CLAW_CLOSE_THRESHOLD){
-            clawClosed = true;
-        }
+        this.clawClosed = true;
     }
 
 

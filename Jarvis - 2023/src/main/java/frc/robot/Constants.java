@@ -55,7 +55,7 @@ public final class Constants {
         public static final double DRIVE_GEARING = 8; 
         public static final double WHEEL_DIA = 3.875; //in inches
         public static final double TURN_GEARING = 2.89 * 2.89 * 6;
-        public static final double MAX_SPEED = 3.5;
+        public static final double MAX_SPEED = 4;
         public static final double SLOW_MAX_SPEED = 1.5; 
 
         //module offsets for the zero position for each wheel, in this order
@@ -126,12 +126,12 @@ public final class Constants {
 
 
         public static final ArmState HOME_STATE = new ArmState(Rotation2d.fromDegrees(-22), new Rotation2d(), Rotation2d.fromDegrees(80), true);
-        public static final ArmState NEUTRAL_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(75), true);
+        // public static final ArmState NEUTRAL_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(75), true);
         public static final ArmState PRE_MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(-20), Rotation2d.fromDegrees(93), Rotation2d.fromDegrees(80), true);
         public static final ArmState MID_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(93), Rotation2d.fromDegrees(20), true);
-        public static final ArmState HIGH_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(54),Rotation2d.fromDegrees(130),Rotation2d.fromDegrees(290),true);
-        public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(39),Rotation2d.fromDegrees(105),Rotation2d.fromDegrees( 185), false);
-        public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30), Rotation2d.fromDegrees(70), true);
+        public static final ArmState HIGH_SCORE_STATE = new ArmState(Rotation2d.fromDegrees(20),Rotation2d.fromDegrees(125),Rotation2d.fromDegrees(0),true);
+        public static final ArmState PICKUP_STATE = new ArmState(Rotation2d.fromDegrees(-20),Rotation2d.fromDegrees(85),Rotation2d.fromDegrees( 13), false);
+        public static final ArmState CLEARANCE_STATE = new ArmState(Rotation2d.fromDegrees(-22), Rotation2d.fromDegrees(50), Rotation2d.fromDegrees(80), true);
         
         public static final double BASE_HOLDING_POWER = -0.06;
 

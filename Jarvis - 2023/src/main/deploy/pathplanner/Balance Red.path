@@ -2,13 +2,13 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.7977873330924976,
-        "y": 1.052062132654934
+        "x": 14.11865487192513,
+        "y": 2.8230324729880234
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.797787333092498,
-        "y": 1.052062132654934
+        "x": 13.270781637717123,
+        "y": 2.8519372423360236
       },
       "holonomicAngle": 0,
       "isReversal": false,
@@ -16,7 +16,10 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Home Modules",
+          "Clearance State"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -24,37 +27,12 @@
     },
     {
       "anchorPoint": {
-        "x": 3.0,
-        "y": 5.0
+        "x": 12.692686250757118,
+        "y": 2.8615721654520243
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 4.0
-      },
-      "nextControl": {
-        "x": 3.0,
-        "y": 4.0
-      },
-      "holonomicAngle": 0,
-      "isReversal": true,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 5.0,
-        "y": 3.0
-      },
-      "prevControl": {
-        "x": 4.0,
-        "y": 3.0
+        "x": 13.482749946269124,
+        "y": 2.8808420116840248
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -63,7 +41,9 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Charge Station Balance"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0

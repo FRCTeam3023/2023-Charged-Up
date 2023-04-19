@@ -4,9 +4,11 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ArmState;
+import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.subsystems.Arm;
 
@@ -37,7 +39,16 @@ public class ArmControl extends CommandBase {
   @Override
   public void execute() {
     if(Math.abs(joystick.getY()) > 0.25){
-      arm.setBaseMotorOutput(-joystick.getY()* 0.1);
+      if(Constants.testCode){
+        if(arm.currentState.baseJointPosition.getDegrees() > 20){
+          arm.setBaseMotorOutput(Math.min(-joystick.getY()* 0.1, 0));
+        }else{
+          arm.setBaseMotorOutput(-joystick.getY()* 0.1);
+        }
+      }else{
+        arm.setBaseMotorOutput(-joystick.getY()* 0.1);
+
+      }
       stateToHold.baseJointPosition = arm.currentState.baseJointPosition;
     }else{
       arm.setBaseJointPosition(stateToHold.baseJointPosition);
@@ -45,7 +56,24 @@ public class ArmControl extends CommandBase {
 
 
     if(joystick.getPOV() == 0){
-      arm.setElbowMotorOutput(0.25);
+      if(Constants.testCode){
+        if(arm.currentState.baseJointPosition.getDegrees() > 10 && arm.currentState.elbowJointPosition.getDegrees() > 130){
+          // arm.setElbowJointPosition(Rotation2d.fromDegrees(100));
+          arm.setElbowMotorOutput(0);
+          
+        }else if(arm.currentState.baseJointPosition.getDegrees() <= 10 && arm.currentState.elbowJointPosition.getDegrees() >= 100){
+          if(arm.currentState.elbowJointPosition.getDegrees() > 93){
+            arm.setElbowJointPosition(Rotation2d.fromDegrees(90));
+          }else{
+            arm.setElbowMotorOutput(0);
+          }
+          // arm.setElbowJointPosition(Rotation2d.fromDegrees(70));
+        }else{
+          arm.setElbowMotorOutput(0.25);
+        }
+      }else{
+        arm.setElbowMotorOutput(0.25);
+      }
       stateToHold.elbowJointPosition = arm.currentState.elbowJointPosition;
     }else if(joystick.getPOV() == 180){
       arm.setElbowMotorOutput(-.08);

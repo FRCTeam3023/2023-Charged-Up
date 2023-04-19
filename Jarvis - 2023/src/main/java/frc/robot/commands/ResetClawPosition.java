@@ -32,6 +32,7 @@ public class ResetClawPosition extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     arm.resetClawPos(0);
+    arm.setClawMotorOutput(0);
   }
 
   // Returns true when the command should end.
