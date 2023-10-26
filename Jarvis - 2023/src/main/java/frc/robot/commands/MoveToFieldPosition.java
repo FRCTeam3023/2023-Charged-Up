@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Gains;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Util.Gains;
 import frc.robot.subsystems.Drivetrain;
 
 public class MoveToFieldPosition extends CommandBase {

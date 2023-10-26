@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import org.photonvision.PhotonCamera;
 
-import com.pathplanner.lib.PathPlanner;
 
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
@@ -37,6 +36,7 @@ public class Drivetrain extends SubsystemBase {
   private double previousPipelineTimestamp = 0;
   
   ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0,0,0);
+
 
   // public static boolean aprilTagOn
 
@@ -169,6 +169,11 @@ public class Drivetrain extends SubsystemBase {
 
     setModuleStates(moduleStates);
 
+  }
+
+  public void drive(ChassisSpeeds speeds){
+    SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds);
+    setModuleStates(moduleStates);
   }
 
   /**
@@ -325,6 +330,10 @@ public class Drivetrain extends SubsystemBase {
 
   public Rotation2d getPitch(){
     return Rotation2d.fromDegrees(gyro.getYComplementaryAngle());
+  }
+
+  public ChassisSpeeds getRobotRelativeSpeeds(){
+    return kinematics.toChassisSpeeds(getModuleStates());
   }
 
 

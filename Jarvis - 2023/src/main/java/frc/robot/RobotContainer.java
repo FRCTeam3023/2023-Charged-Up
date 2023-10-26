@@ -5,24 +5,19 @@
 package frc.robot;
 
 import java.util.HashMap;
-import java.util.List;
 
-import javax.swing.GroupLayout.Alignment;
 
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.pathplanner.lib.server.PathPlannerServer;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import org.photonvision.PhotonCamera;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,7 +25,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Util.PIDDisplay;
 import frc.robot.commands.ArmControl;
 import frc.robot.commands.HomeCommand;
 import frc.robot.commands.JoystickDrive;
@@ -50,6 +47,9 @@ import frc.robot.subsystems.Drivetrain;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  public static final String PIDList = null;
+
+
   // The robot's subsystems and commands are defined here...
   private final PhotonCamera camera = new PhotonCamera("visionCamera");
 
@@ -60,10 +60,13 @@ public class RobotContainer {
   private final Joystick rightJoystick = new Joystick(1);
   private final Joystick leftJoystick = new Joystick(0);
   private final Joystick launchpad = new Joystick(2);
+  private final Joystick playController = new Joystick(3);
   
-  private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, rightJoystick);
+  
+  private final JoystickDrive joystickDrive = new JoystickDrive(drivetrain, playController);
   private final HomeCommand homeCommand = new HomeCommand(drivetrain);
   private final ArmControl armControl = new ArmControl(arm, leftJoystick);
+
 
   
 
@@ -72,21 +75,21 @@ public class RobotContainer {
 
   // This will load the file "Simple Path.path" and generate it with a max velocity of 2 m/s and a max acceleration of 1 m/s^2
   // for every path in the group
-  List<PathPlannerTrajectory> overLineInnerPath = PathPlanner.loadPathGroup("Over Line - Inner", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> overLineInnerPath = PathPlanner.loadPathGroup("Over Line - Inner", new PathConstraints(3, 1.5));
 
-  List<PathPlannerTrajectory> overLineOuterPath = PathPlanner.loadPathGroup("Over Line - Outer", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> balacePath = PathPlanner.loadPathGroup("Balance", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> cubeBalance = PathPlanner.loadPathGroup("1 Cube - Balance", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> cubeOuter = PathPlanner.loadPathGroup("1 Cube - Outer", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> cubeInner = PathPlanner.loadPathGroup("1 Cube - Inner", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> overLineOuterPath = PathPlanner.loadPathGroup("Over Line - Outer", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> balacePath = PathPlanner.loadPathGroup("Balance", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> cubeBalance = PathPlanner.loadPathGroup("1 Cube - Balance", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> cubeOuter = PathPlanner.loadPathGroup("1 Cube - Outer", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> cubeInner = PathPlanner.loadPathGroup("1 Cube - Inner", new PathConstraints(3, 1.5));
 
-  List<PathPlannerTrajectory> overLineInnerRed = PathPlanner.loadPathGroup("Across Line - Inner Red", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> overLineOuterRed = PathPlanner.loadPathGroup("Across Line - Outer Red", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> BalanceRed = PathPlanner.loadPathGroup("Balance Red", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> overLineInnerRed = PathPlanner.loadPathGroup("Across Line - Inner Red", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> overLineOuterRed = PathPlanner.loadPathGroup("Across Line - Outer Red", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> BalanceRed = PathPlanner.loadPathGroup("Balance Red", new PathConstraints(3, 1.5));
 
-  List<PathPlannerTrajectory> cubeBalanceRed = PathPlanner.loadPathGroup("1 Cube - Balance Red", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> cubeInnerRed = PathPlanner.loadPathGroup("1 Cube - Inner Red", new PathConstraints(3, 1.5));
-  List<PathPlannerTrajectory> cubeOuterRed = PathPlanner.loadPathGroup("1 Cube - Outer Red", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> cubeBalanceRed = PathPlanner.loadPathGroup("1 Cube - Balance Red", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> cubeInnerRed = PathPlanner.loadPathGroup("1 Cube - Inner Red", new PathConstraints(3, 1.5));
+  // List<PathPlannerTrajectory> cubeOuterRed = PathPlanner.loadPathGroup("1 Cube - Outer Red", new PathConstraints(3, 1.5));
 
 
 
@@ -99,46 +102,56 @@ public class RobotContainer {
   HashMap<String, Command> eventMap = new HashMap<>();
 
   
-  SendableChooser<List<PathPlannerTrajectory>> autoChooser = new SendableChooser<>();
+  SendableChooser<String> autoChooser = new SendableChooser<>();
+  
   
 
 
-  // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
-  SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-    drivetrain::getRobotPose, // Pose2d supplier
-    drivetrain::setCurrentPose, // Pose2d consumer, used to reset odometry at the beginning of auto
-    drivetrain.kinematics, // SwerveDriveKinematics
-    new PIDConstants(4, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-    new PIDConstants(4, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
-    drivetrain::setModuleStates, // Module states consumer used to output to the drive subsystem
-    eventMap,
-    drivetrain // The drive subsystem. Used to properly set the requirements of path following commands
-  );
+  
 
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    autoChooser.setDefaultOption("Over Line - Inner", overLineInnerPath);
-    autoChooser.addOption("Over Line - Outer", overLineInnerPath);
-    autoChooser.addOption("Balance", balacePath);
 
-    autoChooser.addOption("Cube - Balance", cubeBalance);
-    autoChooser.addOption("Cube - Inner", cubeInner);
-    autoChooser.addOption("Cube - Outer", cubeOuter);
+    new PIDDisplay();
 
-    autoChooser.addOption("Over Line - Outer Red", overLineOuterRed);
-    autoChooser.addOption("Over Line - Inner Red", overLineInnerRed);
-    autoChooser.addOption("Balance Red", BalanceRed);
+    autoChooser.setDefaultOption("Over Line - Inner", "Over Line - Inner");
+    autoChooser.addOption("Over Line - Outer", "Over Line - Outer");
+    autoChooser.addOption("Balance", "Balance");
 
-    autoChooser.addOption("Cube - Balance Red", cubeBalanceRed);
-    autoChooser.addOption("Cube - Inner Red", cubeInnerRed);
-    autoChooser.addOption("Cube - Outer Red", cubeOuterRed);
+    autoChooser.addOption("Cube - Balance", "1 Cube - Balance");
+    autoChooser.addOption("Cube - Inner", "1 Cube - Inner");
+    autoChooser.addOption("Cube - Outer", "1 Cube - Outer");
+
+    autoChooser.addOption("Over Line - Outer Red", "Across Line - Inner Red");
+    autoChooser.addOption("Over Line - Inner Red", "Across Line - Outer Red");
+    autoChooser.addOption("Balance Red", "Balance Red");
+
+    autoChooser.addOption("Cube - Balance Red", "1 Cube - Balance Red");
+    autoChooser.addOption("Cube - Inner Red", "1 Cube - Inner Red");
+    autoChooser.addOption("Cube - Outer Red", "1 Cube - Outer Red");
+
+
+
 
 
     
 
-    
+    AutoBuilder.configureHolonomic(
+      drivetrain::getRobotPose,
+      drivetrain::setCurrentPose,
+      drivetrain::getRobotRelativeSpeeds, 
+      drivetrain::drive, 
+      new HolonomicPathFollowerConfig(
+        new PIDConstants(4), 
+        new PIDConstants(4), 
+        ModuleConstants.MAX_SPEED, 
+        drivetrain.frontLeftLocation.getX() * Math.sqrt(2) , 
+        new ReplanningConfig()), 
+      arm);
+
+      
 
 
     SmartDashboard.putData(autoChooser);
@@ -159,8 +172,7 @@ public class RobotContainer {
     eventMap.put("Set Claw Cone", new InstantCommand(() -> arm.resetClawPos(ArmConstants.CONE_CLAW_OFFSET)));
     eventMap.put("Reset Claw", new ResetClawPosition(arm));
 
-
-    PathPlannerServer.startServer(5811);
+    
     drivetrain.setDefaultCommand(joystickDrive);
     arm.setDefaultCommand(armControl);
 
@@ -193,6 +205,7 @@ public class RobotContainer {
 
 
     // new JoystickButton(rightJoystick, 2).whileTrue(percentageControl);
+
 
     new JoystickButton(rightJoystick, 3).whileTrue(homeCommand);
 
@@ -274,10 +287,12 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-    List<PathPlannerTrajectory> selectedPath = autoChooser.getSelected();
+    String selectedPath = autoChooser.getSelected();
 
 
-    Command fullAuto = autoBuilder.fullAuto(selectedPath);
+    //Command fullAuto = autoBuilder.fullAuto(selectedPath);
+
+    Command fullAuto = new PathPlannerAuto(selectedPath);
 
 
     return fullAuto;

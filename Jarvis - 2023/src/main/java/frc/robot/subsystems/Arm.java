@@ -20,10 +20,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.ArmState;
 import frc.robot.Constants;
-import frc.robot.Gains;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Util.ArmState;
+import frc.robot.Util.Gains;
 
 public class Arm extends SubsystemBase {
 

@@ -5,8 +5,8 @@
 package frc.robot.commands;
 
 import frc.robot.Constants;
-import frc.robot.Constants.ModuleConstants;
 import frc.robot.subsystems.Drivetrain;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
@@ -15,13 +15,10 @@ public class JoystickDrive extends CommandBase {
   private final Drivetrain drivetrain;
   private final Joystick joystick;
 
+  private final PIDController rotationController = new PIDController(0, 0, 0);
+
   private double xInput;
   private double yInput;
-  private double rInput;
-
-  private double xSpeed;
-  private double ySpeed;
-  private double rot;
 
   /**
    * Creates a new ExampleCommand.
@@ -33,39 +30,47 @@ public class JoystickDrive extends CommandBase {
     this.joystick = joystick;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrain);
+    rotationController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     //take joystick inputs scaled to the max speed of the bot
 
-    xInput = applyDeadband(-joystick.getX(), Constants.DRIVE_TOLERANCE_PERCENT);
-    yInput = applyDeadband(-joystick.getY(), Constants.DRIVE_TOLERANCE_PERCENT);
-    rInput = applyDeadband(-joystick.getTwist(), Constants.ROTATION_TOLERANCE_PERCENT);
-
-
-    if(joystick.getRawButton(1)){
-      xSpeed = yInput * ModuleConstants.SLOW_MAX_SPEED;
-      ySpeed = xInput * ModuleConstants.SLOW_MAX_SPEED;
-      rot = rInput * Constants.SLOW_MAX_ANGULAR_SPEED;
-    }else{
-      
-      xSpeed = yInput * ModuleConstants.MAX_SPEED;
-      ySpeed = xInput * ModuleConstants.MAX_SPEED;
-      rot = rInput * Constants.MAX_ANGULAR_SPEED;
-    }
-
-    if(joystick.getPOV() != -1){
-      xSpeed = Math.cos(joystick.getPOV() * (Math.PI/180)) * 0.2;
-      ySpeed = -Math.sin(joystick.getPOV() * (Math.PI/180)) * 0.2;
-    }
     
-    drivetrain.drive(xSpeed, ySpeed, rot, true);
+
+    xInput = applyDeadband(-joystick.getRawAxis(4), Constants.DRIVE_TOLERANCE_PERCENT);
+    yInput = applyDeadband(-joystick.getRawAxis(5), Constants.DRIVE_TOLERANCE_PERCENT);
+
+    double joystickAngle = Math.atan2(joystick.getRawAxis(0), -joystick.getRawAxis(1));
+    // rInput = applyDeadband(-joystick.getTwist(), Constants.ROTATION_TOLERANCE_PERCENT);.
+
+
+    // if(joystick.getRawButton(1)){
+    //   xSpeed = yInput * ModuleConstants.SLOW_MAX_SPEED;
+    //   ySpeed = xInput * ModuleConstants.SLOW_MAX_SPEED;
+    //   rot = rInput * Constants.SLOW_MAX_ANGULAR_SPEED;
+    // }else{
+      
+    //   xSpeed = yInput * ModuleConstants.MAX_SPEED;
+    //   ySpeed = xInput * ModuleConstants.MAX_SPEED;
+    //   rot = rInput * Constants.MAX_ANGULAR_SPEED;
+    // }
+
+    // if(joystick.getPOV() != -1){
+    //   xSpeed = Math.cos(joystick.getPOV() * (Math.PI/180)) * 0.2;
+    //   ySpeed = -Math.sin(joystick.getPOV() * (Math.PI/180)) * 0.2;
+    // }
+    
+    double rot = Math.sqrt(Math.pow(joystick.getRawAxis(0), 2) + Math.pow(joystick.getRawAxis(1), 2)) * rotationController.calculate(drivetrain.getRobotPose().getRotation().getRadians(), joystickAngle);
+
+    drivetrain.drive(xInput, yInput, rot, true);
   }
 
   // Called once the command ends or is interrupted.

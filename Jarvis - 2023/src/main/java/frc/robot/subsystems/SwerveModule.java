@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -21,13 +22,17 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-import frc.robot.Gains;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.Util.Gains;
+import frc.robot.Util.PIDDisplay;
+import frc.robot.Util.SparkMaxSetter;
+import frc.robot.Util.TalonFXsetter;
 
 /** Add your docs here. */
 public class SwerveModule {
 
     private WPI_TalonFX driveMotor;
+    private TalonFXConfiguration config;
     private CANSparkMax turnMotor;
     private double moduleOffset;
     private DigitalInput hallEffectSensor;
@@ -66,27 +71,26 @@ public class SwerveModule {
 
         //main drive motor
         driveMotor = new WPI_TalonFX(driveID);
-
-        //Reset, basic config
         driveMotor.configFactoryDefault();
         driveMotor.setNeutralMode(NeutralMode.Brake);
         driveMotor.set(ControlMode.PercentOutput, 0);
-        driveMotor.configClosedloopRamp(0.25);
-
         driveMotor.setInverted(isInverted);
 
+        config = new TalonFXConfiguration();
+        config.closedloopRamp = 0.25;
         //select sensor for main PID loop
-        driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX ,  Constants.TIMEOUT_MS);
-
+        config.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
         //config gains for main PID loop
-        driveMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, driveGains.P);
-        driveMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, driveGains.I);
-        driveMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, driveGains.D);
-        driveMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, driveGains.F);
+        config.slot0.kP = driveGains.P;
+        config.slot0.kI = driveGains.I;
+        config.slot0.kD = driveGains.D;
+        config.slot0.kF = driveGains.F;
 
-        //peak Output
-        driveMotor.configPeakOutputForward(driveGains.PeakOutput);
-        driveMotor.configPeakOutputReverse(-driveGains.PeakOutput);
+        //Peak Output
+        config.peakOutputForward = driveGains.PeakOutput;
+        config.peakOutputReverse = -driveGains.PeakOutput;
+
+        driveMotor.configAllSettings(config);
 
 
 
@@ -124,6 +128,13 @@ public class SwerveModule {
         turnPIDController.setOutputRange(-0.5, 0.5);
 
         turnEncoder.setPosition(0);
+
+
+
+
+
+        PIDDisplay.PIDList.addOption("DriveMotor " + moduleID, new TalonFXsetter(driveMotor, config));
+        PIDDisplay.PIDList.addOption("SteerMotor " + moduleID, new SparkMaxSetter(turnPIDController));
     }
 
     
