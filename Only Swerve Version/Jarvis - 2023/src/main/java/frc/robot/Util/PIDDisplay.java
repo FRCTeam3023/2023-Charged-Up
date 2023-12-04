@@ -4,6 +4,8 @@
 
 package frc.robot.Util;
 
+import java.util.List;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -18,27 +20,25 @@ public class PIDDisplay extends SubsystemBase{
     //shuffeboard stuff
 
     public static final SendableChooser<PIDSetter> PIDList = new SendableChooser<>();
-    public static final WPILibSetter defaultPID = new WPILibSetter(new PIDController(0, 0, 0));
+    public static final WPILibSetter defaultPID = new WPILibSetter(List.of(new PIDController(0, 0, 0)));
 
     private static final ShuffleboardTab PIDTab = Shuffleboard.getTab("PID");
 
-    private static GenericEntry PEntry = PIDTab.add("P", 0).withPosition(2, 2).getEntry();
-    private static GenericEntry IEntry = PIDTab.add("I", 0).getEntry();
-    private static GenericEntry DEntry = PIDTab.add("D", 0).getEntry();
-    private static GenericEntry FEntry = PIDTab.add("F", 0).getEntry();
+    private static GenericEntry PEntry = PIDTab.add("P", 0).withPosition(0, 1).getEntry();
+    private static GenericEntry IEntry = PIDTab.add("I", 0).withPosition(1, 1).getEntry();
+    private static GenericEntry DEntry = PIDTab.add("D", 0).withPosition(2, 1).getEntry();
+    private static GenericEntry FEntry = PIDTab.add("F", 0).withPosition(3, 1).getEntry();
 
 
 
-    private static PIDSetter selectedPID;
-    private static PIDSetter lastSelected;
+    PIDSetter selectedPID;
+    PIDSetter lastSelected;
 
-    private static double PValue;
-    private static double IValue;
-    private static double DValue;
-    private static double FValue;
+    double PValue;
+    double IValue;
+    double DValue;
+    double FValue;
 
-
-    
     public PIDDisplay(){
         PIDList.setDefaultOption("Default PID", defaultPID);
         PIDTab.add(PIDList).withPosition(0, 0).withSize(4,1);

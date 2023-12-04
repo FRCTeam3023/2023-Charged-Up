@@ -1,0 +1,111 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 2.541092100729137,
+        "y": 2.7216389953464644
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.2200834985321007,
+        "y": 2.7216389953464644
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Home Modules",
+          "Mid State"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 1.7977873330924976,
+        "y": 2.7216389953464644
+      },
+      "prevControl": {
+        "x": 2.152286529965356,
+        "y": 2.7216389953464644
+      },
+      "nextControl": {
+        "x": 2.152286529965356,
+        "y": 2.7216389953464644
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [
+          "Reset Claw"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 2.379577926980506,
+        "y": 2.7182939063818337
+      },
+      "prevControl": {
+        "x": 2.070820561962209,
+        "y": 2.7182939063818337
+      },
+      "nextControl": {
+        "x": 2.688335291998803,
+        "y": 2.7182939063818337
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [
+          "Clearance State"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 3.7986354742447226,
+        "y": 2.737509935012562
+      },
+      "prevControl": {
+        "x": 3.6109146654985205,
+        "y": 2.7688928196097367
+      },
+      "nextControl": null,
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Charge Station Balance"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    }
+  ],
+  "maxVelocity": 3.0,
+  "maxAcceleration": 1.5,
+  "isReversed": null,
+  "markers": []
+}

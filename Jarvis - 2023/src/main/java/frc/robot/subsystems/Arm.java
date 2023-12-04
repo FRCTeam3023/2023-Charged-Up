@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.sensors.CANCoder;
 
@@ -24,6 +25,8 @@ import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Util.ArmState;
 import frc.robot.Util.Gains;
+import frc.robot.Util.PIDDisplay;
+import frc.robot.Util.TalonFXsetter;
 
 public class Arm extends SubsystemBase {
 
@@ -68,21 +71,38 @@ public class Arm extends SubsystemBase {
     baseMotor.set(ControlMode.PercentOutput, 0);
     baseMotor.setInverted(false);
 
-    //select internal sensor
-    baseMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX, Constants.TIMEOUT_MS);
-    //change the feedback units to degrees of output
-    baseMotor.configSelectedFeedbackCoefficient( (1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.BASE_GEAR_RATIO) * 360);
+    // //select internal sensor
+    // baseMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, Constants.PRIMARY_PID_LOOP_IDX, Constants.TIMEOUT_MS);
+    // //change the feedback units to degrees of output
+    // baseMotor.configSelectedFeedbackCoefficient( (1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.BASE_GEAR_RATIO) * 360);
     
 
-    baseMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.P);
-    baseMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.I);
-    baseMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.D);
-    baseMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.F);
+    // baseMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.P);
+    // baseMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.I);
+    // baseMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.D);
+    // baseMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.F);
 
-    baseMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.PeakOutput);
-    baseMotor.configClosedloopRamp(1.5);
+    // baseMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, baseJointGains.PeakOutput);
+    // baseMotor.configClosedloopRamp(1.5);
 
     baseMotor.setSelectedSensorPosition(0);
+
+    TalonFXConfiguration baseConfiguration = new TalonFXConfiguration();
+
+    baseConfiguration.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
+    baseConfiguration.primaryPID.selectedFeedbackCoefficient = (1/Constants.FALCON_UNITS_PER_REV) * (1/ArmConstants.BASE_GEAR_RATIO) * 360;
+
+    baseConfiguration.slot0.kP = baseJointGains.P;
+    baseConfiguration.slot0.kI = baseJointGains.I;
+    baseConfiguration.slot0.kD = baseJointGains.D;
+    baseConfiguration.slot0.kF = baseJointGains.F;
+    baseConfiguration.closedloopRamp = 1.5;
+    baseConfiguration.peakOutputForward = baseJointGains.PeakOutput;
+    baseConfiguration.peakOutputReverse = baseConfiguration.peakOutputForward;
+
+    baseMotor.configAllSettings(baseConfiguration);
+
+    PIDDisplay.PIDList.addOption("Base Motor", new TalonFXsetter(baseMotor, baseConfiguration));
 
     //-----------------------------------------------------------
 
@@ -91,27 +111,36 @@ public class Arm extends SubsystemBase {
     elbowMotor.set(ControlMode.PercentOutput, 0);
     elbowMotor.setInverted(false);
 
-    // elbowMotor.configRemoteFeedbackFilter(elbowEncoder, 0);
-    // elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    // elbowMotor.configSelectedFeedbackCoefficient((1/Constants.CANCODER_UNITS_PER_REV) * 360);
 
 
+    // elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    // elbowMotor.configSelectedFeedbackCoefficient((1/ArmConstants.ELBOW_GEAR_RATIO) * (1/Constants.FALCON_UNITS_PER_REV) * 360);
 
-    elbowMotor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    elbowMotor.configSelectedFeedbackCoefficient((1/ArmConstants.ELBOW_GEAR_RATIO) * (1/Constants.FALCON_UNITS_PER_REV) * 360);
-
-    elbowJointOffset = elbowEncoder.getAbsolutePosition() - elbowMotor.getSelectedSensorPosition();
+    // elbowJointOffset = elbowEncoder.getAbsolutePosition() - elbowMotor.getSelectedSensorPosition();
 
 
 
 
-    elbowMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.P);
-    elbowMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.I);
-    elbowMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.D);
-    elbowMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.F);
+    // elbowMotor.config_kP(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.P);
+    // elbowMotor.config_kI(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.I);
+    // elbowMotor.config_kD(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.D);
+    // elbowMotor.config_kF(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.F);
 
-    elbowMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.PeakOutput);
-    elbowMotor.configClosedloopRamp(1.5);
+    // elbowMotor.configClosedLoopPeakOutput(Constants.PRIMARY_PID_LOOP_IDX, elbowJointGains.PeakOutput);
+    // elbowMotor.configClosedloopRamp(1.5);
+
+    TalonFXConfiguration elbowConfiguration = new TalonFXConfiguration();
+
+    elbowConfiguration.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
+    elbowConfiguration.primaryPID.selectedFeedbackCoefficient = (1/ArmConstants.ELBOW_GEAR_RATIO) * (1/Constants.FALCON_UNITS_PER_REV) * 360;
+
+    elbowConfiguration.slot0.kP = elbowJointGains.P;
+    elbowConfiguration.slot0.kI = elbowJointGains.I;
+    elbowConfiguration.slot0.kD = elbowJointGains.D;
+    elbowConfiguration.slot0.kF = elbowJointGains.F;
+
+    elbowConfiguration.slot0.closedLoopPeakOutput = elbowJointGains.PeakOutput;
+
 
 
     //----------------------------------------------------------------

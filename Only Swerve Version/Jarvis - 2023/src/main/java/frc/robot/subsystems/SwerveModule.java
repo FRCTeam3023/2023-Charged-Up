@@ -4,9 +4,13 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
@@ -30,7 +34,6 @@ import frc.robot.Util.TalonFXsetter;
 
 /** Add your docs here. */
 public class SwerveModule {
-
     private WPI_TalonFX driveMotor;
     private TalonFXConfiguration config;
     private CANSparkMax turnMotor;
@@ -40,7 +43,7 @@ public class SwerveModule {
     private RelativeEncoder turnEncoder;
     private SparkMaxPIDController turnPIDController;
 
-    private Gains turnGains = new Gains(2,0,0,0,0,1);
+    private Gains turnGains = new Gains(.8,0,0,0,0,1);
 
 
     private Gains driveGains = new Gains(0 /*0.05*/,0,0,0.05,0,1);
@@ -50,6 +53,10 @@ public class SwerveModule {
     private boolean lastState;
 
     private Timer timer = new Timer();
+
+    private static List<TalonFX> driveMotors = new ArrayList<TalonFX>();
+    private static TalonFXConfiguration talonFXConfig; //Reflects the latest constructor call
+    private static List<SparkMaxPIDController> turnPIDControllers = new ArrayList<SparkMaxPIDController>();
 
 
     /**
@@ -107,7 +114,7 @@ public class SwerveModule {
         turnPIDController = turnMotor.getPIDController();
         
         //reduce shocking turn speeds, for testing and smoother driving
-        turnMotor.setClosedLoopRampRate(0.1);
+        turnMotor.setClosedLoopRampRate(0.3);
 
 
 
@@ -125,15 +132,13 @@ public class SwerveModule {
         turnPIDController.setIZone(turnGains.Izone);
         turnPIDController.setOutputRange(-turnGains.PeakOutput, turnGains.PeakOutput);
 
+        turnPIDController.setOutputRange(-0.5, 0.5);
 
         turnEncoder.setPosition(0);
 
-
-
-
-
-        PIDDisplay.PIDList.addOption("DriveMotor " + moduleID, new TalonFXsetter(driveMotor, config));
-        PIDDisplay.PIDList.addOption("SteerMotor " + moduleID, new SparkMaxSetter(turnPIDController));
+        driveMotors.add(driveMotor);
+        talonFXConfig = config;
+        turnPIDControllers.add(turnPIDController);
     }
 
     
@@ -204,7 +209,7 @@ public class SwerveModule {
             turnPIDController.setReference(moduleOffset, CANSparkMax.ControlType.kPosition);
         } else {
             //or keep rotating
-            turnMotor.set(0.5);
+            turnMotor.set(0.25);
         }
 
         lastState = getSwitch();
@@ -293,5 +298,23 @@ public class SwerveModule {
      */
     public void setSteerAngle(double angle){
         turnPIDController.setReference(angle, CANSparkMax.ControlType.kPosition);
+    }
+
+    /**
+     * Returns a list of all swerve drive motors
+     */
+    public static List<TalonFX> getDriveMotors() {
+        return driveMotors;
+    }
+
+    /**
+     * Returns a list of all swerve turn motor PIDs
+     */
+    public static List<SparkMaxPIDController> getTurnPIDControllers() {
+        return turnPIDControllers;
+    }
+
+    public static TalonFXConfiguration getTalonFXConfig() {
+        return talonFXConfig;
     }
 }

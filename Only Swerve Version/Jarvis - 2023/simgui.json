@@ -1,8 +1,18 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "ADIS16470[0]": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/PID/SendableChooser[0]": "String Chooser",
+      "/Shuffleboard/PID/SendableChooser[1]": "String Chooser",
       "/SmartDashboard/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/SendableChooser[1]": "String Chooser"
     }
@@ -11,13 +21,18 @@
     "Persistent Values": {
       "open": false
     },
-    "transitory": {
+    "retained": {
       "Shuffleboard": {
         "PID": {
+          "SendableChooser[0]": {
+            "open": true
+          },
           "open": true
         },
         "open": true
-      },
+      }
+    },
+    "transitory": {
       "SmartDashboard": {
         "SendableChooser[0]": {
           "open": true

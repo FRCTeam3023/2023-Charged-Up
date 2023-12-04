@@ -1,0 +1,54 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 14.11865487192513,
+        "y": 2.8230324729880234
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 13.270781637717123,
+        "y": 2.8519372423360236
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Home Modules",
+          "Clearance State"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 12.692686250757118,
+        "y": 2.8615721654520243
+      },
+      "prevControl": {
+        "x": 13.482749946269124,
+        "y": 2.8808420116840248
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Charge Station Balance"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    }
+  ],
+  "markers": []
+}
