@@ -24,7 +24,8 @@ import edu.wpi.first.math.util.Units;
 
 public final class Constants {
 
-    public static final boolean USE_CONTROLLER = true;
+    /** Enables and disables conventional driving of swerve drive */
+    public static final boolean CONVENTIONAL_DRIVE = true;
 
     public static final boolean testCode = true;
 

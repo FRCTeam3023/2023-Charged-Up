@@ -35,4 +35,9 @@ public class Gains {
 		this.V = V;
 		this.peakOutput = peakOutput;
 	}
+
+	public Gains(double P, double peakOutput){
+		this.P = P;
+		this.peakOutput = peakOutput;
+	}
 }

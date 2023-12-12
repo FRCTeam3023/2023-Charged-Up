@@ -155,6 +155,10 @@ public class Drivetrain extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean isFieldRelative){
 
+   
+   
+    rot = Math.signum(rot) * Math.min(Math.abs(rot), Constants.MAX_ANGULAR_SPEED);
+
     // Alliance alliance = DriverStation.getAlliance();
 
     // Rotation2d heading =  getRobotPose().getRotation();

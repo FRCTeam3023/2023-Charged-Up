@@ -2,39 +2,39 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.Subsystems;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.InvertType;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Util.Gains;
 
 /** Add your docs here. */
 public class SwerveModule {
-    private WPI_TalonFX driveMotor;
-    private TalonFXConfiguration config;
+    private TalonFX driveMotor;
     private CANSparkMax turnMotor;
     private double moduleOffset;
     private DigitalInput hallEffectSensor;
@@ -42,10 +42,12 @@ public class SwerveModule {
     private RelativeEncoder turnEncoder;
     private SparkMaxPIDController turnPIDController;
 
-    private Gains turnGains = new Gains(.8,0,0,0,0,1);
+    private Gains turnGains = new Gains(.6, 1);
+
+    private Gains driveGains = new Gains(5, 0, 0.15, 2.65, 12);
 
 
-    private Gains driveGains = new Gains(0 /*0.05*/,0,0,0.05,0,1);
+    // private Gains driveGains = new Gains(0 /*0.05*/,0,0,0.05,0,1);
 
     private boolean homeStatus = false;
     public boolean homeFinished = false;
@@ -53,10 +55,23 @@ public class SwerveModule {
 
     private Timer timer = new Timer();
 
-    private static List<TalonFX> driveMotors = new ArrayList<TalonFX>();
+    private VelocityVoltage velocityRequest = new VelocityVoltage(0);
+
+    private static List<TalonFXConfigurator> driveConfigurators = new ArrayList<>();
     private static TalonFXConfiguration talonFXConfig; //Reflects the latest constructor call
     private static List<SparkMaxPIDController> turnPIDControllers = new ArrayList<SparkMaxPIDController>();
 
+     /** Shuffelboard tab to display telemetry such as heading, homing status, gyro drift, etc*/
+    private static final ShuffleboardTab telemTab = Shuffleboard.getTab("Telemetry");
+
+    private TalonFXConfiguration driveConfiguration;
+
+    GenericEntry desiredSpeedEntry;
+    GenericEntry desiredAngleEntry;
+    GenericEntry actualSpeedEntry;
+    GenericEntry actualAngleEntry;
+    GenericEntry turnOutputEntry;
+    GenericEntry driveOutputEntry;
 
     /**
      * A single swerve module object
@@ -68,37 +83,36 @@ public class SwerveModule {
      * @param sensorID DIO pin number of the hall effect sensor
      */
 
-    public SwerveModule(int moduleID, int driveID, int turnID, double moduleOffset, boolean isInverted, int sensorID){
+    public SwerveModule(int moduleID, int driveID, int turnID, double moduleOffset, InvertedValue inverted, int sensorID){
 
         this.moduleOffset = moduleOffset;
         this.moduleID = moduleID;
 
         hallEffectSensor = new DigitalInput(sensorID);
 
-        //main drive motor
-        driveMotor = new WPI_TalonFX(driveID);
-        driveMotor.configFactoryDefault();
-        driveMotor.setNeutralMode(NeutralMode.Brake);
-        driveMotor.set(ControlMode.PercentOutput, 0);
-        driveMotor.setInverted(isInverted);
+        /*--------------------------------------------------------------------------------------------*/
+        //Configure Drive Motor
 
-        config = new TalonFXConfiguration();
-        config.closedloopRamp = 0.25;
-        //select sensor for main PID loop
-        config.primaryPID.selectedFeedbackSensor = TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice();
-        //config gains for main PID loop
-        config.slot0.kP = driveGains.P;
-        config.slot0.kI = driveGains.I;
-        config.slot0.kD = driveGains.D;
-        config.slot0.kF = driveGains.F;
+        driveMotor = new TalonFX(driveID);
 
-        //Peak Output
-        config.peakOutputForward = driveGains.peakOutput;
-        config.peakOutputReverse = -driveGains.peakOutput;
+        driveConfiguration = new TalonFXConfiguration();
+        driveConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        driveConfiguration.MotorOutput.Inverted = inverted;
+        driveConfiguration.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.25;
 
-        driveMotor.configAllSettings(config);
+        driveConfiguration.Slot0.kP = driveGains.P;
+        driveConfiguration.Slot0.kI = driveGains.I;
+        driveConfiguration.Slot0.kD = driveGains.D;
+        driveConfiguration.Slot0.kS = driveGains.S;
+        driveConfiguration.Slot0.kV = driveGains.V;
 
+        driveConfiguration.Voltage.PeakForwardVoltage = driveGains.peakOutput;
+        driveConfiguration.Voltage.PeakReverseVoltage = -driveGains.peakOutput;
 
+        driveConfiguration.Feedback.SensorToMechanismRatio = ModuleConstants.DRIVE_GEARING / Units.inchesToMeters(ModuleConstants.WHEEL_DIA * Math.PI);
+        driveConfiguration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+
+        driveMotor.getConfigurator().apply(driveConfiguration);
 
         /*-------------------------------------------------------------------------------------------*/
 
@@ -115,29 +129,48 @@ public class SwerveModule {
         //reduce shocking turn speeds, for testing and smoother driving
         turnMotor.setClosedLoopRampRate(0.3);
 
-
-
         //set up encoder on the NEO
         turnEncoder = turnMotor.getEncoder();
         turnEncoder.setPositionConversionFactor(2 * Math.PI * (1/ModuleConstants.TURN_GEARING)); //changes rotations to Radians
-        turnEncoder.setVelocityConversionFactor(2 * Math.PI * (1/ModuleConstants.TURN_GEARING) / 60 ); //changes rpm to rad/sec
-
+        turnEncoder.setPosition(0);
+        
+        turnPIDController.setPositionPIDWrappingEnabled(true);
+        turnPIDController.setPositionPIDWrappingMaxInput(Math.PI);
+        turnPIDController.setPositionPIDWrappingMinInput(-Math.PI);
 
         //set up PID gains for the turning motor
         turnPIDController.setP(turnGains.P);
-        turnPIDController.setI(turnGains.I);
-        turnPIDController.setD(turnGains.D);
-        turnPIDController.setFF(turnGains.F);
-        turnPIDController.setIZone(turnGains.Izone);
         turnPIDController.setOutputRange(-turnGains.peakOutput, turnGains.peakOutput);
 
-        turnPIDController.setOutputRange(-0.5, 0.5);
 
-        turnEncoder.setPosition(0);
 
-        driveMotors.add(driveMotor);
-        talonFXConfig = config;
+        turnMotor.enableVoltageCompensation(12);
+
+        /*--------------------------------------------------------------------------------- */
+
+
+        driveConfigurators.add(driveMotor.getConfigurator());
+        talonFXConfig = driveConfiguration;
         turnPIDControllers.add(turnPIDController);
+
+        velocityRequest.UpdateFreqHz = 100;
+
+
+
+
+
+
+
+
+        desiredSpeedEntry = telemTab.add("Desired Speed " + moduleID, 0).withPosition(0, moduleID - 1).getEntry();
+        desiredAngleEntry = telemTab.add("Desired Angle " + moduleID, 0).withPosition(3, moduleID - 1).getEntry();
+
+        actualSpeedEntry = telemTab.add("Actual Speed " + moduleID, 0).withPosition(1, moduleID - 1).getEntry();
+        actualAngleEntry = telemTab.add("Actual Angle " + moduleID, 0).withPosition(4, moduleID - 1).getEntry();
+
+        driveOutputEntry = telemTab.add("Drive Output " + moduleID, 0).withPosition(6, moduleID - 1).getEntry();
+        turnOutputEntry = telemTab.add("Turn Output " + moduleID, 0).withPosition(7, moduleID - 1).getEntry();
+
     }
 
     
@@ -149,45 +182,32 @@ public class SwerveModule {
      */
     public void setDesiredState(SwerveModuleState desiredState){
 
-        SmartDashboard.putNumber("target", desiredState.speedMetersPerSecond);
-        SmartDashboard.putNumber("actual", getSpeed());
+        desiredSpeedEntry.setDouble(desiredState.speedMetersPerSecond);
+        desiredAngleEntry.setDouble(desiredState.angle.getRadians());
 
-        //prevents returning back to 0 state when not moving
+        //prevents returning back to foreward state when not moving
         if(Math.abs(desiredState.speedMetersPerSecond) < .001){
             stop();
             return;
         }
 
-        //get current relative encoder pos
-        double currentAngleRadians = turnEncoder.getPosition();
-
-        //modulus of current angle, never exeed [0, 2pi)
-        double currentAngleRadiansMod = currentAngleRadians % (2.0 * Math.PI);
-        if (currentAngleRadiansMod < 0.0) {
-            currentAngleRadiansMod += 2.0 * Math.PI;
-        }
-
         //optimize the state for the current angle, prevents more than 90 degrees of motion at once
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState, new Rotation2d(currentAngleRadiansMod));
+        SwerveModuleState state = SwerveModuleState.optimize(desiredState, getConstrainedAngle());
 
-        /*  m/s to units/100ms 
-         *  m/s * rev/meters * units/rev * gearing * .1 (to get sec to 100ms)
-         */
-        double targetVelocity_Units = state.speedMetersPerSecond / Units.inchesToMeters(ModuleConstants.WHEEL_DIA * Math.PI) * Constants.FALCON_UNITS_PER_REV * ModuleConstants.DRIVE_GEARING * 0.1;
-        //set to unit speed
-        driveMotor.set(ControlMode.Velocity, targetVelocity_Units);
+        velocityRequest.Velocity = state.speedMetersPerSecond;
+        driveMotor.setControl(velocityRequest);
 
-        // The reference angle has the range [0, 2pi) but the Neo's encoder can go above that
-        double referenceAngleRadians = state.angle.getRadians();
-        double adjustedReferenceAngleRadians = referenceAngleRadians + currentAngleRadians - currentAngleRadiansMod;
-        if (referenceAngleRadians - currentAngleRadiansMod > Math.PI) {
-            adjustedReferenceAngleRadians -= 2.0 * Math.PI;
-        } else if (referenceAngleRadians - currentAngleRadiansMod < -Math.PI) {
-            adjustedReferenceAngleRadians += 2.0 * Math.PI;
-        }
 
         //set reference angle to this new adjustment
-        turnPIDController.setReference(adjustedReferenceAngleRadians, CANSparkMax.ControlType.kPosition);
+        turnPIDController.setReference(state.angle.getRadians(), CANSparkMax.ControlType.kPosition);
+
+        desiredSpeedEntry.setDouble(velocityRequest.Velocity);
+        actualSpeedEntry.setDouble(driveMotor.getVelocity().getValue());
+        actualAngleEntry.setDouble(turnEncoder.getPosition());
+
+        turnOutputEntry.setDouble(turnMotor.get());
+        driveOutputEntry.setDouble(driveMotor.get());
+
 
     }
 
@@ -221,7 +241,6 @@ public class SwerveModule {
     }
 
 
-
     /**
      * @return state of the hall effect sensor
      */
@@ -233,7 +252,7 @@ public class SwerveModule {
      * @return speed of drive motor in meters/second
      */
     public double getSpeed(){
-        return driveMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_REV * 10 / ModuleConstants.DRIVE_GEARING * Units.inchesToMeters(ModuleConstants.WHEEL_DIA * Math.PI);
+        return driveMotor.getVelocity().getValue();
     }
 
     /**
@@ -242,6 +261,14 @@ public class SwerveModule {
      */
     public Rotation2d getAngle(){
         return new Rotation2d(turnEncoder.getPosition());
+    }
+
+    /**
+     * Angle of the swerve module constrained to (-PI, PI)
+     * @return
+     */
+    public Rotation2d getConstrainedAngle(){
+        return new Rotation2d(MathUtil.angleModulus(getAngle().getRadians()));
     }
 
     /**
@@ -271,7 +298,7 @@ public class SwerveModule {
     }
 
     public SwerveModulePosition getPosition(){
-        return new SwerveModulePosition(driveMotor.getSelectedSensorPosition() / Constants.FALCON_UNITS_PER_REV * (1/ModuleConstants.DRIVE_GEARING) * (Units.inchesToMeters(Math.PI * ModuleConstants.WHEEL_DIA)), getAngle());
+        return new SwerveModulePosition(driveMotor.getPosition().getValue(), getAngle());
     }
 
     /**
@@ -287,9 +314,11 @@ public class SwerveModule {
      * Resets the encoder position for both motors
      */
     public void zeroEncoders() {
-        driveMotor.setSelectedSensorPosition(0);
+        driveMotor.setRotorPosition(0);
         turnEncoder.setPosition(0);
     }
+
+    
     
     /**
      * test code for manual movement of steering angle 
@@ -302,8 +331,8 @@ public class SwerveModule {
     /**
      * Returns a list of all swerve drive motors
      */
-    public static List<TalonFX> getDriveMotors() {
-        return driveMotors;
+    public static List<TalonFXConfigurator> getDriveConfigurators() {
+        return driveConfigurators;
     }
 
     /**

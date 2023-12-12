@@ -59,20 +59,12 @@ public class JoystickDrive extends CommandBase {
   @Override
   public void execute() {
 
-    if(Constants.USE_CONTROLLER){
-      xInputRight = -applyDeadband(controller.getRawAxis(4), Constants.DRIVE_TOLERANCE_PERCENT) * 2;
-      yInputRight = -applyDeadband(controller.getRawAxis(5), Constants.DRIVE_TOLERANCE_PERCENT) * 2;
+    xInputRight = -applyDeadband(controller.getRawAxis(4), Constants.DRIVE_TOLERANCE_PERCENT);
+    yInputRight = -applyDeadband(controller.getRawAxis(5), Constants.DRIVE_TOLERANCE_PERCENT);
 
-      joystickAngle = Math.atan2(-controller.getRawAxis(1), controller.getRawAxis(0)) - Math.PI/2;
-      System.out.println(joystickAngle);
-      joystickMagnitude = Math.sqrt(Math.pow(controller.getRawAxis(0), 2) + Math.pow(controller.getRawAxis(1), 2)); 
-    }else{
-      // xInputRight = applyDeadband(rightJoystick.getX(), Constants.DRIVE_TOLERANCE_PERCENT);
-      // yInputRight = applyDeadband(rightJoystick.getY(), Constants.DRIVE_TOLERANCE_PERCENT);
-
-      // joystickAngle = Math.atan2(leftJoystick.getX(), -leftJoystick.getY());
-      // joystickMagnitude = Math.sqrt(Math.pow(leftJoystick.getX(), 2) + Math.pow(leftJoystick.getY(), 2));
-    }
+    joystickAngle = Math.atan2(-controller.getRawAxis(1), controller.getRawAxis(0)) - Math.PI/2;
+    System.out.println(joystickAngle);
+    joystickMagnitude = Math.sqrt(Math.pow(controller.getRawAxis(0), 2) + Math.pow(controller.getRawAxis(1), 2)); 
     
 
     if (joystickMagnitude > 0.25) {
@@ -81,7 +73,11 @@ public class JoystickDrive extends CommandBase {
       targetRotation = drivetrain.getChassisAngle().getRadians();
     }
 
-    double rotationSpeed = rotationController.calculate(drivetrain.getChassisAngle().getRadians(), targetRotation);    
+    double rotationSpeed = rotationController.calculate(drivetrain.getChassisAngle().getRadians(), targetRotation);   
+    
+    if(Constants.CONVENTIONAL_DRIVE){
+      rotationSpeed = -Math.signum(controller.getRawAxis(0)) * Math.pow(controller.getRawAxis(0), 2) * 5;
+    }
 
     drivetrain.drive(yInputRight, xInputRight, rotationSpeed, true);
   }
